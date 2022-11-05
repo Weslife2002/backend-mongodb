@@ -1,35 +1,32 @@
-# backend-mongodb
-
 <!-- TABLE OF CONTENTS -->
-## ${\color{orange}Table}$ ${\color{orange}of}$ ${\color{orange}Contents}$
+# **Table of Contents**
 
-- [backend-mongodb](#backend-mongodb)
-  - [${\color{orange}Table}$ ${\color{orange}of}$ ${\color{orange}Contents}$](#colororangetable-colororangeof-colororangecontents)
-  - [${\color{orange}Requirement}$](#colororangerequirement)
-  - [${\color{orange}Database}$ ${\color{orange}terminologies}$](#colororangedatabase-colororangeterminologies)
-    - [${\color{89CFF0}ORM}$ ${\color{89CFF0}and}$ ${\color{89CFF0}Driver}$](#color89cff0orm-color89cff0and-color89cff0driver)
-    - [${\color{89CFF0}Schema}$](#color89cff0schema)
-  - [${\color{orange}MongoDB}$ ${\color{orange}and}$ ${\color{orange}NoSQL}$ ${\color{orange}database}$](#colororangemongodb-colororangeand-colororangenosql-colororangedatabase)
-    - [${\color{89CFF0}What}$ ${\color{89CFF0}is}$ ${\color{89CFF0}NoSQL}$ ${\color{89CFF0}database?}$](#color89cff0what-color89cff0is-color89cff0nosql-color89cff0database)
-    - [${\color{89CFF0}NoSQL}$ ${\color{89CFF0}vs}$ ${\color{89CFF0}SQL}$](#color89cff0nosql-color89cff0vs-color89cff0sql)
-    - [${\color{89CFF0}Schema}$ ${\color{89CFF0}in}$ ${\color{89CFF0}NoSQL}$](#color89cff0schema-color89cff0in-color89cff0nosql)
-    - [${\color{89CFF0}What}$ ${\color{89CFF0}is}$ ${\color{89CFF0}populate?}$](#color89cff0what-color89cff0is-color89cff0populate)
-    - [${\color{89CFF0}MongoDB}$ ${\color{89CFF0}relationship}$ ${\color{89CFF0}design}$ ${\color{89CFF0}best}$ ${\color{89CFF0}practice}$](#color89cff0mongodb-color89cff0relationship-color89cff0design-color89cff0best-color89cff0practice)
-    - [${\color{89CFF0}How}$ ${\color{89CFF0}indexing}$ ${\color{89CFF0}work}$ ${\color{89CFF0}in}$ ${\color{89CFF0}MongoDB}$](#color89cff0how-color89cff0indexing-color89cff0work-color89cff0in-color89cff0mongodb)
-  - [${\color{orange}Mongoose}$](#colororangemongoose)
-    - [${\color{89CFF0}Basic}$ ${\color{89CFF0}commands}$](#color89cff0basic-color89cff0commands)
-      - [**Create schema**](#create-schema)
-      - [**Create model**](#create-model)
-      - [**Create data instance**](#create-data-instance)
-      - [**Save instance to collection**](#save-instance-to-collection)
-      - [**find and findById**](#find-and-findbyid)
-    - [${\color{89CFF0}Schema}$ ${\color{89CFF0}types}$ ${\color{89CFF0}in}$ ${\color{89CFF0}mongoose}$](#color89cff0schema-color89cff0types-color89cff0in-color89cff0mongoose)
-      - [**Embedded Schema**](#embedded-schema)
-      - [**Reference Schema**](#reference-schema)
-    - [${\color{89CFF0}Schema}$ ${\color{89CFF0}validation}$](#color89cff0schema-color89cff0validation)
+- [**Table of Contents**](#table-of-contents)
+- [**Requirement**](#requirement)
+- [**Database terminologies**](#database-terminologies)
+  - [**ORM and Driver**](#orm-and-driver)
+  - [**Schema**](#schema)
+- [**MongoDB and NoSQL database**](#mongodb-and-nosql-database)
+  - [**What is NoSQL database?**](#what-is-nosql-database)
+  - [**NoSQL vs SQL**](#nosql-vs-sql)
+  - [**Schema in NoSQL**](#schema-in-nosql)
+  - [**What is populate?**](#what-is-populate)
+  - [**MongoDB relationship design best practice**](#mongodb-relationship-design-best-practice)
+  - [**How indexing work in MongoDB**](#how-indexing-work-in-mongodb)
+- [**Mongoose**](#mongoose)
+  - [**Basic commands**](#basic-commands)
+    - [Create schema](#create-schema)
+    - [Create model](#create-model)
+    - [Create data instance](#create-data-instance)
+    - [Save instance to collection](#save-instance-to-collection)
+    - [find() and findById()](#find-and-findbyid)
+  - [**Schema types in mongoose**](#schema-types-in-mongoose)
+    - [Embedded Schema](#embedded-schema)
+    - [Reference Schema](#reference-schema)
+  - [**Schema validation**](#schema-validation)
 
 <!-- overview -->
-## ${\color{orange}Requirement}$
+# **Requirement**
 
 This time we are required to learn about MongoDb - a NoSQL database management system and Mongoose - a npm library built for working with mongodb database. Below are some specific requirements we need to work on:
 
@@ -41,9 +38,9 @@ This time we are required to learn about MongoDb - a NoSQL database management s
 - What is NoSQL? How is it different from SQL?
 - Indexing in MongoDb
 
-## ${\color{orange}Database}$ ${\color{orange}terminologies}$
+# **Database terminologies**
 
-### ${\color{89CFF0}ORM}$ ${\color{89CFF0}and}$ ${\color{89CFF0}Driver}$
+## **ORM and Driver**
 
 ORM stands for (Object-Relational Mapping) is a layer of software used to abstract away the work with database. Instead of working with raw data and raw query, user is now works with object, therefore user doesn't need to know how to work with the database driver to query them. When a query is executed, it will first be transform into raw queries first.
 On the other hand, database driver require users to work directly with raw queries, and the users also need to handle much more low-level concept and works.
@@ -53,19 +50,19 @@ On the other hand, database driver require users to work directly with raw queri
 As ORM simplifies the work with database, you should use it when the requirement for querying database is basic, where ORM does support it.
 However in complicated project that requires high performance database queries, It is better to opt for working with driver (raw queries) instead.
 
-### ${\color{89CFF0}Schema}$
+## **Schema**
 
 A database schema defines how data is organized within a relational database; this is inclusive of logical constraints such as, table names, fields, data types, and the relationships between these entities. Schemas commonly use visual representations to communicate the architecture of the database, becoming the foundation for an organization’s data management discipline. This process of database schema design is also known as data modeling.
 
-## ${\color{orange}MongoDB}$ ${\color{orange}and}$ ${\color{orange}NoSQL}$ ${\color{orange}database}$
+# **MongoDB and NoSQL database**
 
-### ${\color{89CFF0}What}$ ${\color{89CFF0}is}$ ${\color{89CFF0}NoSQL}$ ${\color{89CFF0}database?}$
+## **What is NoSQL database?**
 
 NoSQL database like its name conveys, is non-tabular database in which they have no fixed schema. They may be document, key-value, graph, or wide-column stores.
 
-### ${\color{89CFF0}NoSQL}$ ${\color{89CFF0}vs}$ ${\color{89CFF0}SQL}$
+## **NoSQL vs SQL**
 
-Weak points over SQL (**${\color{green}ACID}$** property):
+Weak points over SQL (**${\color{lightblue}ACID}$** property):
 
 - Atomic
 - Consistency
@@ -80,15 +77,15 @@ Strong points over SQL:
 - Scalability
 - NoSQL can store unstructured, semi-structured data or structured data. While SQL is only for structured data.
 
-**${\color{green}BASE}$** property of NoSQL:
+**${\color{lightblue}BASE}$** property of NoSQL:
 
 - Basically Available: Guarantees the availability of the data . There will be a response to any request (can be failure too).
 - Soft state: The state of the system could change over time.
 - Eventual consistency: The system will eventually become consistent once it stops receiving input.
 
-### ${\color{89CFF0}Schema}$ ${\color{89CFF0}in}$ ${\color{89CFF0}NoSQL}$
+## **Schema in NoSQL**
 
-### ${\color{89CFF0}What}$ ${\color{89CFF0}is}$ ${\color{89CFF0}populate?}$
+## **What is populate?**
 
 Populating is the process of adding data to table in MongoDB.
 There are two mains way of doing that:
@@ -96,17 +93,17 @@ There are two mains way of doing that:
 - Adding one by one
 - Bulk Adding
 
-### ${\color{89CFF0}MongoDB}$ ${\color{89CFF0}relationship}$ ${\color{89CFF0}design}$ ${\color{89CFF0}best}$ ${\color{89CFF0}practice}$
+## **MongoDB relationship design best practice**
 
-### ${\color{89CFF0}How}$ ${\color{89CFF0}indexing}$ ${\color{89CFF0}work}$ ${\color{89CFF0}in}$ ${\color{89CFF0}MongoDB}$
+## **How indexing work in MongoDB**
 
-## ${\color{orange}Mongoose}$
+# **Mongoose**
 
 Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment. The part below will discuss how to use mongoose.
 
 _**${\color{#FFCC00}NOTE:}$** Mongoose supports both promises and callbacks._
 
-### ${\color{89CFF0}Basic}$ ${\color{89CFF0}commands}$
+## **Basic commands**
 
 - Database connection command
 
@@ -118,7 +115,7 @@ In mongoose, we can use the below syntax to connect with the database:
 
 The mongoose.connect is an async function and the time for connecting to mongodb server is quite large but mongoose has a queue for database commands, where all commands will be save there, waiting for the connection to establish and then run.
 
-#### **Create schema**
+### Create schema
 
 In mongoose, we can use the below syntax to create a new database schema:
 
@@ -132,7 +129,7 @@ In mongoose, we can use the below syntax to create a new database schema:
 
 We need a schema to create a model for ORM queries later.
 
-#### **Create model**
+### Create model
 
 In mongoose, we can use the below syntax to create a new model:
 
@@ -150,7 +147,7 @@ For example:
   collectionName: User  =>  users
 ```
 
-#### **Create data instance**
+### Create data instance
 
 The model object created before can be used to add data to the collection.
 
@@ -176,7 +173,7 @@ The instance created is infact an object in JS, you can access and modify the da
   newUser.name = 'Truong Tran Duy Tan';
 ```
 
-#### **Save instance to collection**
+### Save instance to collection
 
 After created new instance, use can save them by the command:
 
@@ -184,13 +181,13 @@ After created new instance, use can save them by the command:
   newUser.save();
 ```
 
-#### **find and findById**
+### find() and findById()
 
-### ${\color{89CFF0}Schema}$ ${\color{89CFF0}types}$ ${\color{89CFF0}in}$ ${\color{89CFF0}mongoose}$
+## **Schema types in mongoose**
 
 In MongoDB, we can have reference data model and embedded data model, the section below will discuss how to create one and when to use it.
 
-#### **Embedded Schema**
+### Embedded Schema
 
 It is suggest that for one-to-one relation and one-to-many relation, when the data is often used together, we should opt for embedded model to include them inside one document as it still maintains the data consistency but also the query speed.
 
@@ -228,7 +225,7 @@ There are two ways to create embedded schema:
   })
 ```
 
-#### **Reference Schema**
+### Reference Schema
 
 Reference model on the other hand is suitable for many-to-many relation or the case when the data is to big to be stored inside one document or the related data is not often queried along, it is better to use reference model.
 
@@ -243,7 +240,7 @@ Here is the syntax where you can define one in mongoose:
   })
 ```
 
-### ${\color{89CFF0}Schema}$ ${\color{89CFF0}validation}$
+## **Schema validation**
 
 Mongoose supports addding constraint to the instance you created.
 
