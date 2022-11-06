@@ -60,6 +60,7 @@ Strong points over SQL:
 A database schema defines how data is `organized`, this is inclusive of logical constraints such as data types, and the `relationships between entities`.
 
 Schemas commonly use visual representations to communicate the `architecture of the database`, becoming the foundation for an organization’s data management discipline. This process of database schema design is also known as `data modeling`.
+
 ## **Schema in NoSQL**
 
 NoSQL doesn't have a fixed schema, but when working with NoSQL, there are some library that support createing Schema for your collection.
@@ -98,6 +99,7 @@ On the other hand, `database driver` require users to work directly with `raw qu
 As ORM simplifies the work with database, you should use it when the requirement for querying database is basic, where ORM does support it.
 
 However in complicated project that requires high performance database queries, It is better to opt for working with driver (raw queries) instead.
+
 # **Mongoose**
 
 Mongoose is a MongoDB `object modeling tool` designed to work in an `asynchronous environment`. The part below will discuss how to use mongoose.
@@ -212,8 +214,8 @@ In relational database, we have join method, but for non-relational database, we
   User.find({ name: { $ne: 'Duy Tan' } });
 ```
 
-- $gt / $gte: Check for greater than/ greater than or equal 
-- $lt / $lte: Check for less than/ less than or equal
+- $gt / $gte: Check for greater than/ greater than or equal.
+- $lt / $lte: Check for less than/ less than or equal.
 
 ```js
   User.find({ age: { $gt: 12 } })
