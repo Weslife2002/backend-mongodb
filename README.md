@@ -42,8 +42,8 @@ This time we are required to learn about MongoDb - a NoSQL database management s
 
 ## **ORM and Driver**
 
-ORM stands for (Object-Relational Mapping) is a layer of software used to abstract away the work with database. Instead of working with raw data and raw query, user is now works with object, therefore user doesn't need to know how to work with the database driver to query them. When a query is executed, it will first be transform into raw queries first.
-On the other hand, database driver require users to work directly with raw queries, and the users also need to handle much more low-level concept and works.
+`ORM` stands for `Object-Relational Mapping`, is a layer of software used to abstract away the work with database. Instead of working with raw data and raw query, user is now works with `object`, therefore user doesn't need to know how to work with the database driver to query them. When a query is executed, it will first be transform into raw queries first.
+On the other hand, `database driver` require users to work directly with `raw queries`, and the users also need to handle much more low-level concept and works.
 
 **When to use ORM and when not?**
 
@@ -52,13 +52,15 @@ However in complicated project that requires high performance database queries, 
 
 ## **Schema**
 
-A database schema defines how data is organized within a relational database; this is inclusive of logical constraints such as, table names, fields, data types, and the relationships between these entities. Schemas commonly use visual representations to communicate the architecture of the database, becoming the foundation for an organization’s data management discipline. This process of database schema design is also known as data modeling.
+A database schema defines how data is `organized`, this is inclusive of logical constraints such as data types, and the `relationships between entities`.
+
+Schemas commonly use visual representations to communicate the `architecture of the database`, becoming the foundation for an organization’s data management discipline. This process of database schema design is also known as `data modeling`.
 
 # **MongoDB and NoSQL database**
 
 ## **What is NoSQL database?**
 
-NoSQL database like its name conveys, is non-tabular database in which they have no fixed schema. They may be document, key-value, graph, or wide-column stores.
+NoSQL database like its name conveys, is `non-tabular database` in which they have no fixed schema. They may be `document`, `key-value`, `graph`, or `wide-column` stores.
 
 ## **NoSQL vs SQL**
 
@@ -75,7 +77,7 @@ Strong points over SQL:
 - Replication of data stores to avoid Single Point of Failure.
 - Can handle Data variety and huge amounts of data.
 - Scalability
-- NoSQL can store unstructured, semi-structured data or structured data. While SQL is only for structured data.
+- Can store unstructured, semi-structured data or structured data. While SQL is only for structured data.
 
 **${\color{lightblue}BASE}$** property of NoSQL:
 
@@ -99,9 +101,9 @@ There are two mains way of doing that:
 
 # **Mongoose**
 
-Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment. The part below will discuss how to use mongoose.
+Mongoose is a MongoDB `object modeling tool` designed to work in an `asynchronous environment`. The part below will discuss how to use mongoose.
 
-_**${\color{#FFCC00}NOTE:}$** Mongoose supports both promises and callbacks._
+_**${\color{yellow}NOTE:}$** Mongoose supports both `promises` and `callbacks`._
 
 ## **Basic commands**
 
@@ -113,7 +115,7 @@ In mongoose, we can use the below syntax to connect with the database:
   mongoose.connect('mongodb://<HostIP>:<PORT>/<Database>');
 ```
 
-The mongoose.connect is an async function and the time for connecting to mongodb server is quite large but mongoose has a queue for database commands, where all commands will be save there, waiting for the connection to establish and then run.
+The mongoose.connect is an async function and the time for connecting to mongodb server is quite large but mongoose has a `queue for storing database commands`, where all commands will be save there, waiting for the connection to establish and then run.
 
 ### Create schema
 
@@ -137,7 +139,7 @@ In mongoose, we can use the below syntax to create a new model:
   mongoose.model('<collectionName>', schema);
 ```
 
-The collectionName is the collection name of the collection in the database. The mongoose by default will auto lowercase the first character of the collectionName and convert it to plural state. If you didn't create a collection with that name before, mongoose will also create it for you.
+The collectionName is the collection name of the collection in the database. The mongoose by default will auto `lowercase` the first character of the collectionName and convert it to `plural` state. If you didn't create a collection with that name before, mongoose will also create it for you.
 
 The variable schema is the schema your created before.
 
@@ -183,13 +185,19 @@ After created new instance, use can save them by the command:
 
 ### find() and findById()
 
+Each object in MongoDB has an unique ID string, in mongoose you can search for an object by its ID or by search for it by its key-value pair.
+
+```js
+  newUser.save();
+```
+
 ## **Schema types in mongoose**
 
-In MongoDB, we can have reference data model and embedded data model, the section below will discuss how to create one and when to use it.
+In MongoDB, we can have `reference` data model and `embedded` data model, the section below will discuss how to create one and when to use it.
 
 ### Embedded Schema
 
-It is suggest that for one-to-one relation and one-to-many relation, when the data is often used together, we should opt for embedded model to include them inside one document as it still maintains the data consistency but also the query speed.
+It is suggest that for `one-to-one relation` and `one-to-many relation`, when the data is often `used together`, we should opt for embedded model to include them inside one document as it still maintains the data consistency but also the query speed.
 
 Take user-info and the user-account for example, Normally, when a user login, we will also need to get user-info later on, so in that case, we can merge the user-info collection and the user-account collection as one collection.
 
@@ -227,7 +235,7 @@ There are two ways to create embedded schema:
 
 ### Reference Schema
 
-Reference model on the other hand is suitable for many-to-many relation or the case when the data is to big to be stored inside one document or the related data is not often queried along, it is better to use reference model.
+Reference model on the other hand is suitable for `many-to-many` relation or the case when the data is `too big to be stored inside one document` or the related data is `not often queried along`, it is better to use reference model.
 
 Here is the syntax where you can define one in mongoose:
 
