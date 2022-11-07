@@ -16,8 +16,10 @@
     - [Create model](#create-model)
     - [Create data instance](#create-data-instance)
     - [Save instance to collection](#save-instance-to-collection)
-    - [Read using find() and findById()](#read-using-find-and-findbyid)
+    - [Read](#read)
     - [Populate](#populate)
+    - [Update](#update)
+    - [Delete](#delete)
     - [Complex filter object](#complex-filter-object)
     - [Complex update object](#complex-update-object)
     - [Read Modifiers](#read-modifiers)
@@ -78,15 +80,15 @@ Aside from defining the structure of your documents and the types of data you're
 - Plugins
 - pseudo-JOINs
 
-// TODO: Give examples in mongoose.
+// TODO: Schema handle getter, setter, index, middleware, ... ?
 
 ## **MongoDB relationship design best practice**
 
-// TODO
+// TODO: Relationship design
 
 ## **How indexing work in MongoDB**
 
-// TODO
+// TODO: indexing
 
 # **ORM and Driver**
 
@@ -104,7 +106,7 @@ However in complicated project that requires high performance database queries, 
 
 Mongoose is a MongoDB `object modeling tool` designed to work in an `asynchronous environment`. The part below will discuss how to use mongoose.
 
-_**${\color{yellow}NOTE:}$** Mongoose supports both `promises` and `callbacks`._
+_**${\color{yellow}Note:}$** Mongoose supports both `promises` and `callbacks`._
 
 ## **Basic commands**
 
@@ -152,7 +154,7 @@ For example:
 
 ### Create data instance
 
-The model object created before can be used to add data to the collection.
+To create an instance, you can you the below method.
 
 ```js
   const newUser1 = new User({ 
@@ -176,33 +178,104 @@ The instance created is infact an object in JS, you can access and modify the da
   newUser.name = 'Truong Tran Duy Tan';
 ```
 
+_${\color{yellow}Note :}$ Model.create() method accepts array of documents as the parameter and it will return an array of instance, however, you will need to save it one by one, and this will increase network delay time compare to insertMany(). **Both method are checked by the schema validation so when working with bulk create, use insertMany instead.**_
+
 ### Save instance to collection
 
-After created new instance, use can save them by the command ``document.save()`` or ``documents.bulkSave()`` for saving mutiple records at one time:
+After created new instance or update one, use can save them by the command ``document.save()`` to save it to the collection, or if you just update an array of documents, opt for ``documents.bulkSave()``:
 
-_${\color{yellow}NOTE:}$ Don't use documents.bulkSave() for bulk-create this will cause error because bulkSave() use bulkWrite() under the hood and bulkWrite() doesn't support insertMany() or replaceMany()._
+_${\color{yellow}Note:}$ Don't use documents.bulkSave() for bulk-create this will cause error because bulkSave() use bulkWrite() under the hood and bulkWrite() doesn't support insertMany()._
 
 ```js
   newUser.save();
   updatedUsers.bulkSave();
 ```
 
-### Read using find() and findById()
+### Read
 
-Each object in MongoDB has an unique ID string, in mongoose you can search for an object by its ID or by search for it by its key-value pair.
+Each object in MongoDB has an unique ID string, in mongoose you can search for an object by its ID or by search for it by its key-value pair. Or you can use findOne instead.
 
 ```js
   const users = await User.find({ name: 'Duy Tan' });
   // Return all the object in the collection that has the pair: name: 'Duy Tan';
+  const address = await Address.findById("63686e68a496b9bddd3f225a");
+  // Output: 
+  //  {
+  //    _id: new ObjectId("63686e68a496b9bddd3f225a"),
+  //    city: 'Ho Chi Minh City',
+  //    street: 'Phu Thuan',
+  //    __v: 0 
+  //  }
 ```
 
-_${\color{yellow} Note:}$ There are functions that mongoose supports such as ``findOneAndUpdate()``, ``findByIdAndUpdate()`` but they are recommended ``not to use`` because it will pass the validation step._
+_${\color{yellow} Note:}$ There are functions that mongoose supports such as ``findOneAndUpdate()``, ``findByIdAndUpdate()``, `findOneAndReplace()` but they are recommended ``not to use`` because it will pass the validation step._
 
 ### Populate
 
-In relational database, we have join method, but for non-relational database, we have a concept called populate, where all the the reference to other object is resolve.
+In relational database, we have join method, but for non-relational database, we have a concept called populate, whenever in the schema of one collection we provide a reference (in any field) to a document from any other collection, we can call populate() method to fill the field with that document.
 
-// TODO Populate in mongoose.
+Let 's consider an example when you have 2 models Address and User where the User model has the field address that reference to an Address object.
+
+``` js
+  const addressSchema = new mongoose.Schema({
+    city: String,
+    street: String,
+  });
+
+  const userSchema = new mongoose.Schema({
+    name: String,
+    age: Number,
+    address: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Address',
+    },
+  });
+
+  const Address = mongoose.model('Address', addressSchema);
+  const User = mongoose.model('User', userSchema);
+
+  User.find().populate('address');
+
+  // This will return all users record with the address fields being filled.
+  // address: {
+  //   _id: new ObjectId("63686e68a496b9bddd3f225a"),
+  //   city: 'Ho Chi Minh City',
+  //   street: 'Phu Thuan',
+  //   __v: 0
+  // },
+
+  // Instead of: 
+  // address: new ObjectId("63686e68a496b9bddd3f225a"),
+```
+
+### Update
+
+You can update documents in mongoose by call the function ``updateOne``, ``updateMany`` or ``replaceOne``.
+
+- ``updateOne`` will update the first document that match the filter.
+- ``updateMany`` will update all the documents that match the filter.
+- ``replaceOne`` will replace the first document that match the filter by exactly the second parameter.
+
+_${\color{yellow}{Note:}}$ Update and replace will bypass the validation step. They also don't change the object 's id._
+
+```js
+  User.updateMany({ age: 20 }, { $inc: { age: 1 } });
+  // Increase all the user with the age of 20 by 1.
+```
+
+### Delete
+
+You can update documents in mongoose by call the function ``deleteOne`` or ``deleteMany``.
+
+- ``deleteOne`` will delete the first document that match the filter.
+- ``deleteMany`` will delete all the documents that match the filter.
+
+```js
+  User.deleteMany({ age: 20 }, { $inc: { age: 1 } });
+  // Increase all the user with the age of 20 by 1.
+```
+
+_${\color{yellow}{Note:}}$ If you delete a record that has another record points to, when populate that one, it will return **null** as the result._
 
 ### Complex filter object
 
