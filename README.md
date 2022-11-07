@@ -392,8 +392,6 @@ any fields not passed to $set.
   // Skip the first 4 users when returning results. This is great for pagination when combined with limit.
 ```
 
-// TODO Update and Delete in mongoose.
-
 ## **Schema types in mongoose**
 
 In MongoDB, we can have `reference` data model and `embedded` data model, the section below will discuss how to create one and when to use it.
