@@ -14,6 +14,11 @@
     - [When should we create index?](#when-should-we-create-index)
   - [**MongoDB anti-pattern design**](#mongodb-anti-pattern-design)
     - [Massive arrays](#massive-arrays)
+    - [Massive number of collections](#massive-number-of-collections)
+    - [Unnecessary indexes](#unnecessary-indexes)
+    - [Bloated documents](#bloated-documents)
+    - [Separating data that is accessed together](#separating-data-that-is-accessed-together)
+    - [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-case-insensitive-indexes)
   - [**MongoDB pattern design**](#mongodb-pattern-design)
     - [The Extended Reference Pattern](#the-extended-reference-pattern)
     - [The Attribute Pattern](#the-attribute-pattern)
@@ -23,7 +28,15 @@
     - [The Bucket Pattern](#the-bucket-pattern)
     - [The Computed Pattern](#the-computed-pattern)
   - [Aggregation](#aggregation)
-    - [$lookup](#lookup)
+    - [Aggregation pipeline stage](#aggregation-pipeline-stage)
+      - [$lookup](#lookup)
+      - [$project](#project)
+      - [$sort](#sort)
+      - [$group](#group)
+      - [$merge](#merge)
+    - [Aggregation Pipeline Operators](#aggregation-pipeline-operators)
+      - [$arrayElemAt(aggregation)](#arrayelemataggregation)
+      - [$reduce(aggregation)](#reduceaggregation)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
   - [**Basic commands**](#basic-commands)
@@ -95,7 +108,7 @@ Aside from defining the structure of your documents and the types of data you're
 - Plugins
 - pseudo-JOINs
 
-// TODO: Schema handle getter, setter, index, middleware, ... ?
+// TODO: Schema handle getter, setter, index, middleware, ... in mongoose example?
 
 ## **Indexing in MongoDB**
 
@@ -178,6 +191,33 @@ Instead of embedding many documents to one document, we could flip the model and
 
 -> [Extended reference pattern](#the-extended-reference-pattern)
 
+### Massive number of collections
+
+storing a massive number of collections (especially if they are unused or unnecessary) in your database.
+
+### Unnecessary indexes
+
+storing an index that is unnecessary because it is:
+
+- rarely used if at all .
+- redundant because another compound index covers it.
+
+### Bloated documents
+
+Storing large amounts of data together in a document when that data is not frequently accessed together.
+
+### Separating data that is accessed together
+
+separating data between different documents and collections that is frequently accessed together.
+
+### Case-insensitive queries without case-insensitive indexes
+
+Frequently executing a case-insensitive query without having a case-insensitive index to cover it.
+
+Reference: [mongodb.com/anti-pattern-design](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
+
+// TODO : Read more about anti pattern and give solutions to the suitable pattern design.
+
 ## **MongoDB pattern design**
 
 ### The Extended Reference Pattern
@@ -206,7 +246,7 @@ The Extended Reference pattern provides a great way to handle these situations. 
 
 ### The Computed Pattern
 
-// TODO: <https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern>
+// TODO: Read more about pattern design <https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern>
 
 ## Aggregation
 
@@ -218,8 +258,9 @@ Aggregation operations process multiple documents and return computed results. Y
 
 - Analyze data changes over time.
 
+### Aggregation pipeline stage
 
-### $lookup
+#### $lookup
 
 - Equality Match with a Single Join Condition syntax :
 
@@ -251,7 +292,84 @@ Aggregation operations process multiple documents and return computed results. Y
 
 Reference at : [mongodb.com-lookup](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/)
 
-// TODO: Aggregation ($lookup, ...)
+#### $project
+
+#### $sort
+
+#### $group
+
+#### $merge
+
+// TODO: Aggregation pipeline stage ($project, ...)
+
+### Aggregation Pipeline Operators
+
+#### $arrayElemAt(aggregation)
+
+Returns the element at the specified array index.
+
+$arrayElemAt has the following syntax:
+
+```bash
+
+  { $arrayElemAt: [ <array>, <idx> ] }
+
+```
+
+**Example:**
+
+A collection named users contains the following documents:
+
+```js
+{ "_id" : 1, "name" : "dave123", favorites: [ "chocolate", "cake", "butter", "apples" ] }
+{ "_id" : 2, "name" : "li", favorites: [ "apples", "pudding", "pie" ] }
+{ "_id" : 3, "name" : "ahn", favorites: [ "pears", "pecans", "chocolate", "cherries" ] }
+{ "_id" : 4, "name" : "ty", favorites: [ "ice cream" ] }
+
+```
+
+The following example returns the first and last element in the favorites array:
+
+```bash
+  db.users.aggregate([
+    {
+      $project:
+        {
+          name: 1,
+          first: { $arrayElemAt: [ "$favorites", 0 ] },
+          last: { $arrayElemAt: [ "$favorites", -1 ] }
+        }
+    }
+  ])
+```
+
+#### $reduce(aggregation)
+
+Applies an expression to each element in an array and combines them into a single value.
+
+``$reduce`` has the following syntax:
+
+```bash
+{
+  $reduce: {
+    input: <array>,
+    initialValue: <expression>,
+    in: <expression>
+  }
+}
+```
+
+**Example:**
+
+```bash
+ {
+    $reduce: {
+       input: ["a", "b", "c"],
+       initialValue: "",
+       in: { $concat : ["$$value", "$$this"] }
+     }
+ }
+```
 
 # **ORM and Driver**
 
