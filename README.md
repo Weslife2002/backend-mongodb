@@ -13,12 +13,12 @@
     - [Multikey indexes](#multikey-indexes)
     - [When should we create index?](#when-should-we-create-index)
   - [**MongoDB anti-pattern design**](#mongodb-anti-pattern-design)
-    - [Massive arrays](#massive-arrays)
-    - [Massive number of collections](#massive-number-of-collections)
-    - [Unnecessary indexes](#unnecessary-indexes)
-    - [Bloated documents](#bloated-documents)
-    - [Separating data that is accessed together](#separating-data-that-is-accessed-together)
-    - [Case-insensitive queries without case-insensitive indexes](#case-insensitive-queries-without-case-insensitive-indexes)
+    - [**Massive arrays**](#massive-arrays)
+    - [**Massive number of collections**](#massive-number-of-collections)
+    - [**Unnecessary indexes**](#unnecessary-indexes)
+    - [**Bloated documents**](#bloated-documents)
+    - [**Separating data that is accessed together**](#separating-data-that-is-accessed-together)
+    - [**Case-insensitive queries without case-insensitive indexes**](#case-insensitive-queries-without-case-insensitive-indexes)
   - [**MongoDB pattern design**](#mongodb-pattern-design)
     - [The Extended Reference Pattern](#the-extended-reference-pattern)
     - [The Attribute Pattern](#the-attribute-pattern)
@@ -32,12 +32,9 @@
       - [$lookup](#lookup)
       - [$project](#project)
       - [$sort](#sort)
-      - [$group](#group)
+      - [$group >< $unwind](#group--unwind)
       - [$count](#count)
       - [$merge](#merge)
-      - [$sum](#sum)
-      - [$min](#min)
-      - [$max](#max)
       - [$limit](#limit)
     - [Aggregation Pipeline Operators](#aggregation-pipeline-operators)
       - [$arrayElemAt(aggregation)](#arrayelemataggregation)
@@ -47,7 +44,7 @@
       - [$rank (aggregation)](#rank-aggregation)
       - [$range (aggregation)](#range-aggregation)
       - [$filter(aggregation)](#filteraggregation)
-      - [$count(aggregation)](#countaggregation)
+      - [$let(aggregation)](#letaggregation)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
   - [**Basic commands**](#basic-commands)
@@ -186,48 +183,72 @@ For example, when we update or insert an instance, we need to update the index a
 
 ## **MongoDB anti-pattern design**
 
-### Massive arrays
+### **Massive arrays**
 
-``Data that is accessed together should be stored together`` -> developers sometimes take this too far and embed massive amounts of information in a single document.
+``Data that is accessed together should be stored together``
 
-How to fix ?
+-> developers sometimes take this too far and embed massive amounts of information in a single document.
+
+- How to fix?
 
 Instead of embedding many documents to one document, we could flip the model and instead embed that one document to many documents.
 
-=> This might lead to duplication.
+=> This might lead to duplication, difficult to handle when we need to frequently update the object.
 
--> difficult to handle when we need to frequently update the object.If you need to update a lot, then you might opt for reference model.
+If you need to update a lot, then you might opt for reference model. However with reference model, you might find yourself need to use $lookup frequently, that will cause execution time.
 
--> However with reference model, you might find yourself need to use $lookup frequently, that will cause execution time.
+Then we have the [Extended reference pattern](#the-extended-reference-pattern) designed to solve the problem.
 
--> [Extended reference pattern](#the-extended-reference-pattern)
+### **Massive number of collections**
 
-### Massive number of collections
+Storing a massive number of collections (especially if they are unused or unnecessary) in your database.
 
-storing a massive number of collections (especially if they are unused or unnecessary) in your database.
+Every collection in MongoDB automatically has an index on the _id field. While the size of this index is pretty small for empty or small collections, thousands of empty or unused indexes can begin to drain resources. Collections will typically have a few more indexes to support efficient queries. All of these indexes add up.
 
-### Unnecessary indexes
+Additionally, the WiredTiger storage engine (MongoDB's default storage engine) stores a file for each collection and a file for each index. WiredTiger will open all files upon startup, so performance will decrease when an excessive number of collections and indexes exist.
 
-storing an index that is unnecessary because it is:
+In general, we recommend limiting collections to 10,000 per replica set. When users begin exceeding 10,000 collections, they typically see decreases in performance.
+
+To avoid this anti-pattern, examine your database and remove unnecessary collections. If you find that you have an increasing number of collections, consider remodeling your data so you have a consistent set of collections.
+
+### **Unnecessary indexes**
+
+Storing an index that is unnecessary because it is:
 
 - rarely used if at all .
 - redundant because another compound index covers it.
 
-### Bloated documents
+Reason why we shouldn't create indexes for every fields:
+
+- Indexes take up space.
+- Indexes can impact the storage engine's performance.
+- Indexes can impact write performance.
+
+### **Bloated documents**
 
 Storing large amounts of data together in a document when that data is not frequently accessed together.
 
-### Separating data that is accessed together
+To keep your queries running as quickly as possible, WiredTiger(the default storage engine for MongoDB) keeps all of the indexes plus the documents that are accessed the most frequently in memory. When these frequently accessed documents and index pages fit in the RAM allotment, MongoDB can query from memory instead of from disk. Queries from memory are faster, so the goal is to keep your most popular documents small enough to fit in the RAM allotment.
+The working set's RAM allotment is the larger of:
 
-separating data between different documents and collections that is frequently accessed together.
+- 50% of (RAM - 1 GB)
+- 256 MB.
 
-### Case-insensitive queries without case-insensitive indexes
+Sometimes data that is related to each other isn't actually accessed together. You might have large, bloated documents that contain information that is related but not actually accessed together frequently. In that case, separate the information into smaller documents in separate collections and use references to connect those documents together.
+
+### **Separating data that is accessed together**
+
+Separating data between different documents and collections that is frequently accessed together.
+
+MongoDB has a ``$lookup`` operation that allows you to join information from more than one collection. ``$lookup`` is great for infrequent, rarely used operations or analytical queries that can run overnight without a time limit. However, ``$lookup`` is not so great when you're frequently using it in your applications as ``$lookup`` operations are ``slow`` and ``resource-intensive`` compared to operations that don't need to combine data from more than one collection.
+
+``Data that is accessed together should be stored together.`` If you'll be frequently reading or updating information together, consider storing the information together using nested documents or arrays. Carefully consider your use case and weigh the benefits and drawbacks of data duplication as you bring data together.
+
+### **Case-insensitive queries without case-insensitive indexes**
 
 Frequently executing a case-insensitive query without having a case-insensitive index to cover it.
 
 Reference: [mongodb.com/anti-pattern-design](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
-
-// TODO : Read more about anti pattern and give solutions to the suitable pattern design.
 
 ## **MongoDB pattern design**
 
@@ -268,6 +289,8 @@ Aggregation operations process multiple documents and return computed results. Y
 - Perform operations on the grouped data to return a single result.
 
 - Analyze data changes over time.
+
+![SQL_to_Aggregation](./img/SQL_to_Aggregation_Mapping.png)
 
 ### Aggregation pipeline stage
 
@@ -352,17 +375,70 @@ The following command uses the ``$sort`` stage to sort on the borough field:
   )
 ```
 
-#### $group
+#### $group >< $unwind
+
+The ``$group`` stage separates documents into groups according to a "group key". The output is one document for each unique group key.
+
+A group key is often a field, or group of fields. The group key can also be the result of an expression. Use the _id field in the $group pipeline stage to set the group key.
+
+The ``$group`` stage has the following prototype form:
+
+```bash
+  {
+    $group:
+      {
+        _id: <expression>, // Group key
+        <field1>: { <accumulator1> : <expression1> },
+        ...
+      }
+  }
+```
+
+``$unwind`` Deconstructs an array field from the input documents to output a document for each element. Each output document is the input document with the value of the array field replaced by the element.
+
+You can pass a document to ``$unwind`` to specify various behavior options.
+
+```bash
+{
+  $unwind:
+    {
+      path: <field path>,
+      includeArrayIndex: <string>,
+      preserveNullAndEmptyArrays: <boolean>
+    }
+}
+```
 
 #### $count
 
+Passes a document to the next stage that contains a count of the number of documents input to the stage.
+
+``$count`` has the following prototype form:
+
+```bash
+  { $count: <string> }
+```
+
 #### $merge
 
-#### $sum
+Writes the results of the aggregation pipeline to a specified collection. The $merge operator must be the last stage in the pipeline.
 
-#### $min
+$merge
+ has the following syntax:
 
-#### $max
+```bash
+{ $merge: {
+     into: <collection> -or- { db: <db>, coll: <collection> },
+     on: <identifier field> -or- [ <identifier field1>, ...],  
+     # Optional
+     let: <variables>,                                         
+     # Optional
+     whenMatched: <replace|keepExisting|merge|fail|pipeline>,  
+     # Optional
+     whenNotMatched: <insert|discard|fail>                     
+     # Optional
+} }
+```
 
 #### $limit
 
@@ -373,8 +449,6 @@ The ``$limit`` stage has the following prototype form:
 ```bash
   { $limit: <positive 64-bit integer> }
 ```
-
-// TODO: Aggregation pipeline stage ($project, ...)
 
 ### Aggregation Pipeline Operators
 
@@ -443,7 +517,55 @@ Applies an expression to each element in an array and combines them into a singl
 
 #### $filter(aggregation)
 
-#### $count(aggregation)
+#### $let(aggregation)
+
+Binds variables for use in the specified expression, and returns the result of the expression.
+
+The ``$let`` expression has the following syntax:
+
+```bash
+{
+  $let:
+     {
+       vars: { <var1>: <expression>, ... },
+       in: <expression>
+     }
+}
+```
+
+**Example**: A sales collection has the following documents:
+
+```bash
+  { _id: 1, price: 10, tax: 0.50, applyDiscount: true }
+  { _id: 2, price: 10, tax: 0.25, applyDiscount: false }
+```
+
+The following aggregation uses ``$let`` in the $project pipeline stage to calculate and return the finalTotal for each document:
+
+```bash
+db.sales.aggregate( [
+   {
+      $project: {
+         finalTotal: {
+            $let: {
+               vars: {
+                  total: { $add: [ '$price', '$tax' ] },
+                  discounted: { $cond: { if: '$applyDiscount', then: 0.9, else: 1 } }
+               },
+               in: { $multiply: [ "$$total", "$$discounted" ] }
+            }
+         }
+      }
+   }
+] )
+```
+
+The aggregation returns the following results:
+
+```bash
+{ "_id" : 1, "finalTotal" : 9.450000000000001 }
+{ "_id" : 2, "finalTotal" : 10.25 }
+```
 
 # **ORM and Driver**
 
@@ -564,6 +686,20 @@ Each object in MongoDB has an unique ID string, in mongoose you can search for a
 ```
 
 _${\color{yellow} Note:}$ There are functions that mongoose supports such as ``findOneAndUpdate()``, ``findByIdAndUpdate()``, `findOneAndReplace()` but they are recommended ``not to use`` because it will pass the validation step._
+
+To filter the fields displays, you can use .select() function.
+Example:
+
+```js
+  // include a and b, exclude other fields
+  query.select('a b');
+  // Equivalent syntaxes:
+  query.select(['a', 'b']);
+  query.select({ a: 1, b: 1 });
+
+  // exclude c and d, include other fields
+  query.select('-c -d');
+```
 
 ### Populate
 
