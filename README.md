@@ -33,10 +33,21 @@
       - [$project](#project)
       - [$sort](#sort)
       - [$group](#group)
+      - [$count](#count)
       - [$merge](#merge)
+      - [$sum](#sum)
+      - [$min](#min)
+      - [$max](#max)
+      - [$limit](#limit)
     - [Aggregation Pipeline Operators](#aggregation-pipeline-operators)
       - [$arrayElemAt(aggregation)](#arrayelemataggregation)
       - [$reduce(aggregation)](#reduceaggregation)
+      - [$cond(aggregation)](#condaggregation)
+      - [$map (aggregation)](#map-aggregation)
+      - [$rank (aggregation)](#rank-aggregation)
+      - [$range (aggregation)](#range-aggregation)
+      - [$filter(aggregation)](#filteraggregation)
+      - [$count(aggregation)](#countaggregation)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
   - [**Basic commands**](#basic-commands)
@@ -294,11 +305,74 @@ Reference at : [mongodb.com-lookup](https://www.mongodb.com/docs/manual/referenc
 
 #### $project
 
+Passes along the documents with the requested fields to the next stage in the pipeline. The specified fields can be existing fields from the input documents or newly computed fields.
+
+The ``$project`` stage has the following prototype form:
+
+```bash
+  { $project: { <specification(s)> } }
+```
+
+${\color{yellow}{Note:}}$ _The specification ``\<field>: \<expression>`` will add a new field or resets the value of an existing field._
+
+```bash
+  { $project: { "<field1>": 0, "<field2>": 0, ... } } 
+  # Return all but the specified fields
+```
+
 #### $sort
+
+Sorts all input documents and returns them to the pipeline in sorted order.
+
+The ``$sort`` stage has the following prototype form:
+
+```bash
+  { $sort: { <field1>: <sort order>, <field2>: <sort order> ... } }
+```
+
+**Example:** Consider the following restaurant collection:
+
+```bash
+  db.restaurants.insertMany( [
+    { "_id" : 1, "name" : "Central Park Cafe", "borough" : "Manhattan"},
+    { "_id" : 2, "name" : "Rock A Feller Bar and Grill", "borough" : "Queens"},
+    { "_id" : 3, "name" : "Empire State Pub", "borough" : "Brooklyn"},
+    { "_id" : 4, "name" : "Stan's Pizzaria", "borough" : "Manhattan"},
+    { "_id" : 5, "name" : "Jane's Deli", "borough" : "Brooklyn"},
+  ] );
+```
+
+The following command uses the ``$sort`` stage to sort on the borough field:
+
+```bash
+  db.restaurants.aggregate(
+    [
+      { $sort : { borough : 1 } }
+    ]
+  )
+```
 
 #### $group
 
+#### $count
+
 #### $merge
+
+#### $sum
+
+#### $min
+
+#### $max
+
+#### $limit
+
+Limits the number of documents passed to the next stage in the pipeline.
+
+The ``$limit`` stage has the following prototype form:
+
+```bash
+  { $limit: <positive 64-bit integer> }
+```
 
 // TODO: Aggregation pipeline stage ($project, ...)
 
@@ -359,17 +433,17 @@ Applies an expression to each element in an array and combines them into a singl
 }
 ```
 
-**Example:**
+#### $cond(aggregation)
 
-```bash
- {
-    $reduce: {
-       input: ["a", "b", "c"],
-       initialValue: "",
-       in: { $concat : ["$$value", "$$this"] }
-     }
- }
-```
+#### $map (aggregation)
+
+#### $rank (aggregation)
+
+#### $range (aggregation)
+
+#### $filter(aggregation)
+
+#### $count(aggregation)
 
 # **ORM and Driver**
 
