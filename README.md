@@ -21,11 +21,11 @@
     - [**Case-insensitive queries without case-insensitive indexes**](#case-insensitive-queries-without-case-insensitive-indexes)
   - [**MongoDB pattern design**](#mongodb-pattern-design)
     - [The Extended Reference Pattern](#the-extended-reference-pattern)
+    - [The Polymorphic Pattern](#the-polymorphic-pattern)
     - [The Attribute Pattern](#the-attribute-pattern)
+    - [The Bucket Pattern](#the-bucket-pattern)
     - [The Outlier Pattern](#the-outlier-pattern)
     - [The Subset Pattern](#the-subset-pattern)
-    - [The Polymorphic Pattern](#the-polymorphic-pattern)
-    - [The Bucket Pattern](#the-bucket-pattern)
     - [The Computed Pattern](#the-computed-pattern)
   - [Aggregation](#aggregation)
     - [Aggregation pipeline stage](#aggregation-pipeline-stage)
@@ -62,7 +62,10 @@
   - [**Schema types in mongoose**](#schema-types-in-mongoose)
     - [Embedded Schema](#embedded-schema)
     - [Reference Schema](#reference-schema)
-  - [**Schema validation**](#schema-validation)
+  - [**Definition that schema handles**](#definition-that-schema-handles)
+    - [**Schema validation**](#schema-validation)
+    - [**Default**](#default)
+    - [**Function**](#function)
 
 # **MongoDB and NoSQL database**
 
@@ -105,7 +108,7 @@ NoSQL doesn't have a fixed schema, but when working with NoSQL, there are some l
 
 Aside from defining the structure of your documents and the types of data you're storing, a Schema handles the definition of:
 
-- Validators (async and sync)
+- [Validators (async and sync)](#schema-validation)
 - Defaults
 - Getters
 - Setters
@@ -248,6 +251,8 @@ MongoDB has a ``$lookup`` operation that allows you to join information from mor
 
 Frequently executing a case-insensitive query without having a case-insensitive index to cover it.
 
+// TODO: Case-insensitive queries without case-insensitive indexes
+
 Reference: [mongodb.com/anti-pattern-design](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
 
 ## **MongoDB pattern design**
@@ -266,19 +271,58 @@ The Extended Reference pattern provides a great way to handle these situations. 
 
 [Reference here](https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern)
 
+### The Polymorphic Pattern
+
+When all documents in a collection are of similar, but not identical, structure, we call this the Polymorphic Pattern. The Polymorphic Pattern is useful when we want to access (query) information from a single collection. Grouping documents together based on the queries we want to run (instead of separating the object across tables or collections) helps improve performance.
+
+// TODO: Polymorphic Pattern
+
 ### The Attribute Pattern
 
-### The Outlier Pattern
+The Attribute Pattern is particularly well suited when:
 
-### The Subset Pattern
+- We have big documents with many similar fields but there is a subset of fields that share common characteristics and we want to sort or query on that subset of fields.
+- The fields we need to sort on are only found in a small subset of documents.
+- Both of the above conditions are met within the documents.
 
-### The Polymorphic Pattern
+For performance reasons, to optimize our search we'd likely need many indexes to account for all of the subsets. Creating all of these indexes could reduce performance. The Attribute Pattern provides a good solution for these cases.
+
+Fix: Moving this subset of data into a key-value sub-document
+
+The Attribute Pattern provides for easier indexing the documents, targeting many similar fields per document. By moving this subset of data into a key-value sub-document, we can use non-deterministic field names, add additional qualifiers to the information, and more clearly state the relationship of the original field and value. When we use the Attribute Pattern, we need fewer indexes, our queries become simpler to write, and our queries become faster.
 
 ### The Bucket Pattern
 
+This pattern is particularly effective when working with Internet of Things (IoT), Real-Time Analytics, or Time-Series data in general. By bucketing data together we make it easier to organize specific groups of data, increasing the ability to discover historical trends or provide future forecasting and optimize our use of storage.
+
+With data coming in as a stream over a period of time (time series data) we may be inclined to store each measurement in its own document. However, this inclination is a very relational approach to handling the data. This can pose some issues as our application scales in terms of data and index size.
+
+By applying the Bucket Pattern to our data model, we get some benefits in terms of index size savings, potential query simplification, and the ability to use that pre-aggregated data in our documents.
+
+### The Outlier Pattern
+
+What happens, when the document structure isn't consistent? What happens when there is data that falls outside the "normal" pattern? What if there's an outlier? Or in other word, we try to handle the "overflow" case.
+
+Fix: Add one field to indicate that there is extra information related to the object written in other documents.
+
+With the Outlier Pattern, we are working to prevent a few queries or documents driving our solution towards one that would not be optimal for the majority of our use cases.
+
+### The Subset Pattern
+
+This pattern addresses the issues associated with a working set that exceeds RAM, resulting in information being removed from memory. This is frequently caused by large documents which have a lot of data that isn't actually used by the application.
+
+Imagine an e-commerce site that has a list of reviews for a product. When accessing that product's data it's quite possible that we'd only need the most recent ten or so reviews. Pulling in the entirety of the product data with all of the reviews could easily cause the working set to expand.
+
+Instead of storing all the reviews with the product, we can split the collection into two collections. One collection would have the most frequently used data, e.g. current reviews and the other collection would have less frequently used data, e.g. old reviews, product history, etc. We can duplicate part of a 1-N or N-N relationship that is used by the most used side of the relationship.
+
+By using smaller documents with more frequently accessed data, we reduce the overall size of the working set. This allows for shorter disk access times for the most frequently used information that an application needs. One tradeoff that we must make when using the Subset Pattern is that we must manage the subset and also if we need to pull in older reviews or all of the information, it will require additional trips to the database to do so.
+
 ### The Computed Pattern
 
-// TODO: Read more about pattern design <https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern>
+The Computed Pattern is utilized when we have data that needs to be computed repeatedly in our application. The Computed Pattern is also utilized when the data access pattern is read intensive; for example, if you have 1,000,000 reads per hour but only 1,000 writes per hour, doing the computation at the time of a write would divide the number of calculations by a factor 1000.
+
+This powerful design pattern allows for a reduction in CPU workload and increased application performance. It can be utilized to apply a computation or operation on data in a collection and store the result in a document. This allows for the avoidance of the same computation being done repeatedly. Whenever your system is performing the same calculations repeatedly and you have a high read to write ratio, consider the Computed Pattern.
+
 
 ## Aggregation
 
@@ -459,9 +503,7 @@ Returns the element at the specified array index.
 $arrayElemAt has the following syntax:
 
 ```bash
-
-  { $arrayElemAt: [ <array>, <idx> ] }
-
+{ $arrayElemAt: [ <array>, <idx> ] }
 ```
 
 **Example:**
@@ -940,7 +982,9 @@ Here is the syntax where you can define one in mongoose:
   })
 ```
 
-## **Schema validation**
+## **Definition that schema handles**
+
+### **Schema validation**
 
 Mongoose supports addding constraint to the instance you created.
 
@@ -951,26 +995,53 @@ For example:
     name: String,
     age: {
       type: Number,
-      max: 100, // Upper-bound
-      min: 1, // Lower-bound
+      max: 100,   // Upper-bound
+      min: 1,     // Lower-bound
+      immutable: true,  // User cannot change one assigned.
+      required: true,   // Not NULL constraint
       validate: {
         validator: v => v % 2,
         message: props => `${props.value} is not an event number`,
       },
     },
-    email: {
-      type: String,
-      minLength: 10, // Lower-bound for length
-      maxLength: 100, // Upper-bound for length
-      required: true, // Not NULL constraint
-      lowercase: true, // Auto lowercase convert
-    },
+  });
+```
+
+### **Default**
+
+Mongoose supports default value if you don't assign it.
+
+For example:
+
+```js
+  const userSchema = new mongoose.Schema({
+    name: String,
     createAt: {
       type: Date,
-      immutable: true,
-      // User cannot change one assigned.
       default: () => Date.now(),
       // Give default value if user doesn't input.
     },
   });
+```
+
+### **Function**
+
+Mongoose supports addding function to the schema.
+
+For example:
+
+```js
+  userSchema.methods.sayHi = function() {
+    console.log(`Hi. My name is ${this.name}`)
+  }
+```
+
+_${\color{yellow}{Note:}}$ Don't use arrow function because we need the this property to reference invidual instances 's property._
+
+To create function for the model itself (not for the instance) use the static key word.
+
+```js
+  userSchema.statics.findByName = function(name){
+    return this.where({ name: new RegExp(name, 'i')})
+  }
 ```
