@@ -7,8 +7,23 @@
   - [**NoSQL vs SQL**](#nosql-vs-sql)
   - [**Schema**](#schema)
   - [**Schema in NoSQL**](#schema-in-nosql)
-  - [**MongoDB relationship design best practice**](#mongodb-relationship-design-best-practice)
-  - [**How indexing work in MongoDB**](#how-indexing-work-in-mongodb)
+  - [**Indexing in MongoDB**](#indexing-in-mongodb)
+    - [Single field index](#single-field-index)
+    - [Compound index](#compound-index)
+    - [Multikey indexes](#multikey-indexes)
+    - [When should we create index?](#when-should-we-create-index)
+  - [**MongoDB anti-pattern design**](#mongodb-anti-pattern-design)
+    - [Massive arrays](#massive-arrays)
+  - [**MongoDB pattern design**](#mongodb-pattern-design)
+    - [The Extended Reference Pattern](#the-extended-reference-pattern)
+    - [The Attribute Pattern](#the-attribute-pattern)
+    - [The Outlier Pattern](#the-outlier-pattern)
+    - [The Subset Pattern](#the-subset-pattern)
+    - [The Polymorphic Pattern](#the-polymorphic-pattern)
+    - [The Bucket Pattern](#the-bucket-pattern)
+    - [The Computed Pattern](#the-computed-pattern)
+  - [Aggregation](#aggregation)
+    - [$lookup](#lookup)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
   - [**Basic commands**](#basic-commands)
@@ -82,13 +97,161 @@ Aside from defining the structure of your documents and the types of data you're
 
 // TODO: Schema handle getter, setter, index, middleware, ... ?
 
-## **MongoDB relationship design best practice**
+## **Indexing in MongoDB**
 
-// TODO: Relationship design
+MongoDB prodives complete support for indexes on any field in a collection of documents. By default, all collections have an index on the `_id field` but user can create their own indexes.
 
-## **How indexing work in MongoDB**
+### Single field index
 
-// TODO: indexing
+To create an index on a field, we need to use createIndex() function.
+
+```bash
+  db.collection.createIndex({ score: 1 });
+  # This will create ascending index one the field score
+```
+
+After creating the index, whenever the user's query can be optimized by using index, the database will use it. For example:
+
+```shell
+  db.collection.find().sort({ score: 1 });
+  db.collection.updateMany({ score: 10 }, { score: 100 });
+  # Instead of searching on the collections, which may be partitioned into blocks over the node network then searching
+```
+
+_${\color{yellow}{Note:}}$ Embedded field can also be created index on._
+
+### Compound index
+
+You can create compound index by adding more pairs on the parameter object.
+
+For example :
+
+```bash
+  db.collection.createIndex({ "item": 1, "location": 1, "stock": 1 });
+```
+
+For a compound index, MongoDB can use the index to support queries on the index prefixes. As such, MongoDB can use the index for queries on the following fields:
+
+- the ``item`` field,
+- the ``item`` field and the ``location`` field,
+- the ``item`` field and the ``location`` field and the ``stock`` field.
+
+### Multikey indexes
+
+To index a field that holds an array value, MongoDB creates an index key for each element in the array. These multikey indexes support efficient queries against array fields. Multikey indexes can be constructed over arrays that hold both scalar values (e.g. strings, numbers) and nested documents.
+
+For a compound-multikey index, each indexed document can have at most one indexed field whose value is an array.
+
+The following query looks for documents where the ratings field is the array [ 5, 9 ]:
+
+```bash
+  db.inventory.find( { ratings: [ 5, 9 ] } )
+```
+
+MongoDB can use the multikey index to find documents that have 5 at any position in the ratings array. Then, MongoDB retrieves these documents and filters for documents whose ratings array equals the query array [ 5, 9 ].
+
+_${\color{yellow}{Note:}}$ $expr does not support multikey indexes._
+
+// TODO: Text index, ... <https://www.mongodb.com/docs/manual/core/index-hashed/>
+
+### When should we create index?
+
+Indexing can help us reduce the query time in some function, however, it also costs to maintain the index in term of storage as well as execution factors. In short, the index itself need to justify its effiency over its maintain cost.
+
+For example, when we update or insert an instance, we need to update the index also. Therefore, it's better to create index related to the query that user often use only.
+
+## **MongoDB anti-pattern design**
+
+### Massive arrays
+
+``Data that is accessed together should be stored together`` -> developers sometimes take this too far and embed massive amounts of information in a single document.
+
+How to fix ?
+
+Instead of embedding many documents to one document, we could flip the model and instead embed that one document to many documents.
+
+=> This might lead to duplication.
+
+-> difficult to handle when we need to frequently update the object.If you need to update a lot, then you might opt for reference model.
+
+-> However with reference model, you might find yourself need to use $lookup frequently, that will cause execution time.
+
+-> [Extended reference pattern](#the-extended-reference-pattern)
+
+## **MongoDB pattern design**
+
+### The Extended Reference Pattern
+
+The extend reference pattern is the most suitable for the case when we need to seperate related data into different collections but try to optimized the JOIN operation.
+
+or example, in an e-commerce application, the idea of an order exists, as does a customer, and inventory. They are separate logical entities.
+
+![filter](./img/extended_reference.png)
+
+Embedding all of the information about a customer for each order just to reduce the JOIN operation results in a lot of duplicated information. Additionally, not all of the customer information may be needed for an order.
+
+The Extended Reference pattern provides a great way to handle these situations. Instead of duplicating all of the information on the customer, we only copy the fields we access frequently. Instead of embedding all of the information or including a reference to JOIN the information, we only embed those fields of the highest priority and most frequently accessed, such as name and address.
+
+[Reference here](https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern)
+
+### The Attribute Pattern
+
+### The Outlier Pattern
+
+### The Subset Pattern
+
+### The Polymorphic Pattern
+
+### The Bucket Pattern
+
+### The Computed Pattern
+
+// TODO: <https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern>
+
+## Aggregation
+
+Aggregation operations process multiple documents and return computed results. You can use aggregation operations to:
+
+- Group values from multiple documents together.
+
+- Perform operations on the grouped data to return a single result.
+
+- Analyze data changes over time.
+
+
+### $lookup
+
+- Equality Match with a Single Join Condition syntax :
+
+```bash
+{
+  $lookup:
+    {
+      from: <>,
+      localField: <>,
+      foreignField: <field from the documents of the "from" collection>,
+      as: <output array field>,
+    }
+}
+```
+
+- To perform correlated and uncorrelated subqueries with two collections, and perform other join conditions besides a single equality match, use this ``$lookup`` syntax:
+
+```bash
+{
+  $lookup:
+    {
+      from: <joined collection>,
+      let: { <var_1>: <expression>, …, <var_n>: <expression> },
+      pipeline: [ <pipeline to run on joined collection> ],
+      as: <output array field>
+    }
+}
+```
+
+Reference at : [mongodb.com-lookup](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/)
+
+// TODO: Aggregation ($lookup, ...)
 
 # **ORM and Driver**
 
