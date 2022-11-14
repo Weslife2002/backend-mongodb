@@ -323,7 +323,6 @@ The Computed Pattern is utilized when we have data that needs to be computed rep
 
 This powerful design pattern allows for a reduction in CPU workload and increased application performance. It can be utilized to apply a computation or operation on data in a collection and store the result in a document. This allows for the avoidance of the same computation being done repeatedly. Whenever your system is performing the same calculations repeatedly and you have a high read to write ratio, consider the Computed Pattern.
 
-
 ## Aggregation
 
 Aggregation operations process multiple documents and return computed results. You can use aggregation operations to:
