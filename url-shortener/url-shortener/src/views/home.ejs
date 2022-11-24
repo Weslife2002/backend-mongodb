@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>url-shortener</title>
+  <link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+  <div id="logo">
+    Short URL
+  </div>
+  <section id="urlbox">
+    <h1>Paste the URL to be shortened</h1>
+    <form action="/shorten" method="post">
+      <div id="formurl">
+        <input type="text" name="url" placeholder="Enter the link here">
+        <div id="formbutton">
+          <input type="submit" value="Shorten URL">
+        </div>
+      </div>
+    </form>
+    <p class="boxtextcenter">This is a free tool to shorten a URL or reduce a link<br>Login or create a new account to
+      keep track of the shorten urls</p>
+    <div class="flex-box">
+      <a href="/login">
+        <button class="login-signup-btn">LogIn</button>
+      </a>
+      <a href="/sign-up">
+        <button class="login-signup-btn">SignUp</button>
+      </a>
+    </div>
+  </section>
+  <div id="box">
+    <div id="row">
+      <div id="column">
+        <div class="icon"><img src="img/icon-like.png"></div>
+        <h3 class="aligncenter">Easy</h3>
+        <p class="aligncenter">ShortURL is easy and fast, enter the long link to get your shortened link</p>
+      </div>
+      <div id="column">
+        <div class="icon"><img src="img/icon-url.png"></div>
+        <h3 class="aligncenter">Shortened</h3>
+        <p class="aligncenter">Use any link, no matter what size, ShortURL always shortens</p>
+      </div>
+      <div id="column">
+        <div class="icon"><img src="img/icon-secure.png"></div>
+        <h3 class="aligncenter">Secure</h3>
+        <p class="aligncenter">It is fast and secure, our service have HTTPS protocol and data encryption</p>
+      </div>
+      <div id="column">
+        <div class="icon"><img src="img/icon-statistics.png"></div>
+        <h3 class="aligncenter">Statistics</h3>
+        <p class="aligncenter">Check the amount of clicks that your shortened url received</p>
+      </div>
+      <div id="column">
+        <div class="icon"><img src="img/icon-unique.png"></div>
+        <h3 class="aligncenter">Reliable</h3>
+        <p class="aligncenter">All links that try to disseminate spam, viruses and malware are deleted</p>
+      </div>
+      <div id="column">
+        <div class="icon"><img src="img/icon-responsive.png"></div>
+        <h3 class="aligncenter">Devices</h3>
+        <p class="aligncenter">Compatible with smartphones, tablets and desktop</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
