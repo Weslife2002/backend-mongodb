@@ -9,8 +9,6 @@ import { seedData, deleteAllData } from './manipulateData.js';
 dotenv.config();
 
 const filterKey = async pattern => {
-  deleteAllData();
-  seedData(process.env.SIMULATE_DATA_NO);
   const found = [];
   let cursor = '0';
   do {
@@ -25,5 +23,7 @@ const filterKey = async pattern => {
   return found;
 };
 
+deleteAllData();
+seedData(process.env.SIMULATE_DATA_NO);
 const pattern = process.argv.slice(2);
 filterKey(pattern);
