@@ -1,16 +1,18 @@
 /* eslint-disable no-console */
 /* eslint-disable import/extensions */
+import dotenv from 'dotenv';
 import redis from './redis.js';
 import { seedData, deleteAllData } from './manipulateData.js';
 
 // const scan = promisify(redis.scan).bind(redis);
 
+dotenv.config();
+
 const filterKey = async pattern => {
   deleteAllData();
-  seedData(100);
+  seedData(process.env.SIMULATE_DATA_NO);
   const found = [];
   let cursor = '0';
-
   do {
     // eslint-disable-next-line no-await-in-loop
     const reply = await Promise.all([redis.scan(cursor, 'MATCH', pattern)]);
