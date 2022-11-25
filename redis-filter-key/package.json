@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "name": "redis-filter-key",
+  "version": "1.0.0",
+  "description": "",
+  "main": "filterKey.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ioredis": "^5.2.4",
+    "lodash": "^4.17.21"
+  }
+}
