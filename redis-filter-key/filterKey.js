@@ -15,7 +15,7 @@ const filterKey = async pattern => {
   let cursor = '0';
   do {
     // eslint-disable-next-line no-await-in-loop
-    const reply = await Promise.all([redis.scan(cursor, 'MATCH', pattern)]);
+    const reply = await redis.scan(cursor, 'MATCH', pattern);
     cursor = reply[0][0];
     found.push(...reply[0][1]);
   } while (cursor !== '0');
