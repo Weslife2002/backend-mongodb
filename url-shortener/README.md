@@ -1,89 +1,58 @@
-<!-- TABLE OF CONTENTS -->
-# **Table of Contents**
+# Task 2
 
-- [**Table of Contents**](#table-of-contents)
-- [Task 1](#task-1)
-  - [Task 1 requirement](#task-1-requirement)
-  - [Workflow](#workflow)
-  - [Main idea](#main-idea)
-  - [Set up and run](#set-up-and-run)
-- [Task 3 - Schema](#task-3---schema)
-  - [Example](#example)
+## Task 2 requirement
 
-# Task 1
+I was assigned to create an url shortener web service that meets the following requirements:
 
-## Task 1 requirement
+- Users can shorten their url without login.
+- Users can keep track of their url 's visit times.
+- Users can delete their shorten urls.
 
-In ``mongoose``, there is a function named ``populate()`` in which it replace the path to the sub-document in the current document by the real sub-document. In this task, we are trying to implement the ``populate()`` method and optimize so that it will takes least call to the database as possible and try to minimize for useless data being transfered.
+## Data Modelling Step
 
-## Workflow
+To meet the requirement, we will need to stores infomation about user account (username, password) and the url detail (the shorten one, the original one).
 
-1. Set up model for book and author using mongoose.
+So the question here is should we use embedded or reference for the relationship between user and the url.
 
-2. Create fake data for books and authors using ``@faker-js/faker`` npm library.
+There are something to consider :
 
-    _${\color{yellow}{Note:}}$ The books will be randomly select author from the authors collections._
+- The relation here is one to many and one user will likely not create too much shorten urls, therefore, we might skip consider about the massive array problem.
+- This web service will likely have the redirect function as the most used one therefore the url fetching step will need to be optimized the most.
 
-3. Write populate.js file simulate the ``populate()`` method in mongoose.
+In conclusion, the reference method seems to be the one to go for this situation.
 
-## Main idea
+## Workflow for task 2
 
-We need to call to database for simulating populate function in which:
+1. Create Model for users and urls.
+2. Create route for create-new-user, login, shorten-url, statics.
+3. Implement the methods.
 
-1. The first call will find all the books we want. Then we will use an array to store all the authors the book references to.
+## Optimization
 
-2. The second call will find all the authors the book references and then we merge the current data with the first call data then return the result.
+### Using Reddis for storing user session
 
-## Set up and run
+As in the ``express-session`` document:
 
-Step 1: Run redis-server and try to connect.
+``The default server-side session storage, MemoryStore, is purposely not designed for a production environment. It will leak memory under most conditions, does not scale past a single process, and is meant for debugging and developing.``
 
-Run redis-server by the following command.
+That means, we should not use the MemoryStore for storing the user session. That could lead to unexpected side-effect in production environment.
 
-```bash
-  sudo service mongodb start
-```
+Beside, if we need to reload the server due to some process being crash. The memory will be clear, and the user they all need to login again.
 
-Step 2: Change the .env file.
+## Some features the app provides
 
-```bash
-  MONGODB_URI = mongodb://localhost:27017/test
-```
+Admins:
 
-Step 3: Uncomment the fake data function in the main function in populate.js.
+1. Admin can see the dashboard the URL and users.
+2. Admin can disable user and if at that time the user has already logined, they will be logged out. (/user-management)
+3. Admin can delete URL.
 
-```js
-async function main() {
-  await fakeAuthorData(1000);
-  await fakeBookData(1000);
-}
-```
+Users and guest:
 
-Step 4: Run the js file in the terminal to create fake data.
-
-```bash
-node populate.js
-```
-
-Step 5: Rewrite the main function in the populate.js file and run to see the result.
-
-```js
-async function main() {
-  const books = await Book.find({}).limit(10);
-  const result = await populate(books);
-  console.log(result);
-  console.log(result[0].authors[0]);
-}
-```
-
-# Task 3 - Schema
-
-By default, Mongoose queries return an instance of the Mongoose Document class. Documents are much heavier than vanilla JavaScript objects, because they have a lot of internal state for change tracking. Enabling the ``lean`` option tells Mongoose to skip instantiating a full Mongoose document and just give you the POJO.
-
-## Example
-
-  ```js
-    const leanDoc = await MyModel.findOne().lean();
-  ```
-
-_${\color{yellow}{Note:}}$ Mongoose support using ``populate()`` with ``lean()`` option._
+1. User and guests can create and access the shortened link.
+2. The shoterned can have expiration time.
+3. Guest will have default shortened link existed of 1 week.
+4. User can login using google account.
+5. User can delete the URL.
+6. The server will check if the link is valid.
+7. Track user-abnormality.
