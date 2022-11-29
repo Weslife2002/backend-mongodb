@@ -14,11 +14,10 @@ const filterKey = async pattern => {
   do {
     // eslint-disable-next-line no-await-in-loop
     const reply = await redis.scan(cursor, 'MATCH', pattern);
-    cursor = reply[0][0];
-    found.push(...reply[0][1]);
+    console.log(reply);
+    cursor = reply[0];
+    found.push(...reply[1]);
   } while (cursor !== '0');
-
-  redis.quit();
   console.log(found);
   return found;
 };
@@ -27,3 +26,4 @@ deleteAllData();
 seedData(process.env.SIMULATE_DATA_NO);
 const pattern = process.argv.slice(2);
 filterKey(pattern);
+deleteAllData();

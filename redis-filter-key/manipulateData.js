@@ -6,7 +6,8 @@ import redis from './redis.js';
 dotenv.config();
 
 async function deleteAllData() {
-  await redis.flushdb();
+  const keyList = redis.keys('book*:shelf*');
+  (await keyList).forEach(key => redis.del(key));
 }
 
 async function seedData(n) {
