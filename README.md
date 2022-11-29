@@ -52,6 +52,8 @@
     - [**Schema validation**](#schema-validation)
     - [**Default**](#default)
     - [**Function**](#function)
+    - [**Lean method**](#lean-method)
+  - [Example](#example)
 
 # **MongoDB and NoSQL database**
 
@@ -710,3 +712,15 @@ To create function for the model itself (not for the instance) use the static ke
     return this.where({ name: new RegExp(name, 'i')})
   }
 ```
+
+### **Lean method**
+
+By default, Mongoose queries return an instance of the Mongoose Document class. Documents are much heavier than vanilla JavaScript objects, because they have a lot of internal state for change tracking. Enabling the ``lean`` option tells Mongoose to skip instantiating a full Mongoose document and just give you the POJO.
+
+## Example
+
+  ```js
+    const leanDoc = await MyModel.findOne().lean();
+  ```
+
+_${\color{yellow}{Note:}}$ Mongoose support using ``populate()`` with ``lean()`` option._
