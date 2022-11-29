@@ -36,13 +36,13 @@
     - [Complex filter object](#complex-filter-object)
     - [Complex update object](#complex-update-object)
     - [Read Modifiers](#read-modifiers)
-  - [**Schema types in mongoose**](#schema-types-in-mongoose)
+    - [**Lean method**](#lean-method)
+  - [**Mongoose Schema**](#mongoose-schema)
     - [Embedded Schema](#embedded-schema)
     - [Reference Schema](#reference-schema)
     - [**Schema validation**](#schema-validation)
     - [**Default**](#default)
     - [**Function**](#function)
-    - [**Lean method**](#lean-method)
 
 # **MongoDB and NoSQL database**
 
@@ -624,7 +624,19 @@ _${\color{yellow}{Note:}}$ Update and replace will bypass the validation step. T
 - limit: Only return a set number of documents
 - skip: Skip a set number of documents from the beginning
 
-## **Schema types in mongoose**
+### **Lean method**
+
+By default, Mongoose queries return an instance of the Mongoose Document class. Documents are much heavier than vanilla JavaScript objects, because they have a lot of internal state for change tracking. Enabling the ``lean`` option tells Mongoose to skip instantiating a full Mongoose document and just give you the POJO.
+
+Example
+
+  ```js
+    const leanDoc = await MyModel.findOne().lean();
+  ```
+
+_${\color{yellow}{Note:}}$ Mongoose support using ``populate()`` with ``lean()`` option._
+
+## **Mongoose Schema**
 
 In MongoDB, we can have `reference` data model and `embedded` data model, the section below will discuss how to create one and when to use it.
 
@@ -699,15 +711,3 @@ To create function for the model itself (not for the instance) use the static ke
     return this.where({ name: new RegExp(name, 'i')})
   }
 ```
-
-### **Lean method**
-
-By default, Mongoose queries return an instance of the Mongoose Document class. Documents are much heavier than vanilla JavaScript objects, because they have a lot of internal state for change tracking. Enabling the ``lean`` option tells Mongoose to skip instantiating a full Mongoose document and just give you the POJO.
-
-Example
-
-  ```js
-    const leanDoc = await MyModel.findOne().lean();
-  ```
-
-_${\color{yellow}{Note:}}$ Mongoose support using ``populate()`` with ``lean()`` option._
