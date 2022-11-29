@@ -27,17 +27,8 @@
     - [The Computed Pattern](#the-computed-pattern)
   - [Aggregation](#aggregation)
     - [Aggregation pipeline stage](#aggregation-pipeline-stage)
-      - [$lookup](#lookup)
-      - [$project](#project)
-      - [$sort](#sort)
-      - [$group \>\< $unwind](#group--unwind)
-      - [$count](#count)
       - [$merge](#merge)
-      - [$limit](#limit)
     - [Aggregation Pipeline Operators](#aggregation-pipeline-operators)
-      - [$arrayElemAt(aggregation)](#arrayelemataggregation)
-      - [$reduce(aggregation)](#reduceaggregation)
-      - [$let(aggregation)](#letaggregation)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
   - [**Basic commands**](#basic-commands)
@@ -292,9 +283,9 @@ Aggregation operations process multiple documents and return computed results. Y
 
 ### Aggregation pipeline stage
 
-#### $lookup
+- $lookup
 
-- Equality Match with a Single Join Condition syntax :
+Equality Match with a Single Join Condition syntax :
 
 ```bash
 {
@@ -308,7 +299,7 @@ Aggregation operations process multiple documents and return computed results. Y
 }
 ```
 
-- To perform correlated and uncorrelated subqueries with two collections, and perform other join conditions besides a single equality match, use this ``$lookup`` syntax:
+To perform correlated and uncorrelated subqueries with two collections, and perform other join conditions besides a single equality match, use this ``$lookup`` syntax:
 
 ```bash
 {
@@ -322,9 +313,7 @@ Aggregation operations process multiple documents and return computed results. Y
 }
 ```
 
-Reference at : [mongodb.com-lookup](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/)
-
-#### $project
+- $project
 
 Passes along the documents with the requested fields to the next stage in the pipeline. The specified fields can be existing fields from the input documents or newly computed fields.
 
@@ -341,7 +330,7 @@ ${\color{yellow}{Note:}}$ _The specification ``\<field>: \<expression>`` will ad
   # Return all but the specified fields
 ```
 
-#### $sort
+- $sort
 
 Sorts all input documents and returns them to the pipeline in sorted order.
 
@@ -373,7 +362,7 @@ The following command uses the ``$sort`` stage to sort on the borough field:
   )
 ```
 
-#### $group >< $unwind
+- $group >< $unwind
 
 The ``$group`` stage separates documents into groups according to a "group key". The output is one document for each unique group key.
 
@@ -407,7 +396,7 @@ You can pass a document to ``$unwind`` to specify various behavior options.
 }
 ```
 
-#### $count
+- $count
 
 Passes a document to the next stage that contains a count of the number of documents input to the stage.
 
@@ -438,7 +427,7 @@ $merge
 } }
 ```
 
-#### $limit
+- $limit
 
 Limits the number of documents passed to the next stage in the pipeline.
 
@@ -450,7 +439,7 @@ The ``$limit`` stage has the following prototype form:
 
 ### Aggregation Pipeline Operators
 
-#### $arrayElemAt(aggregation)
+- $arrayElemAt(aggregation)
 
 Returns the element at the specified array index.
 
@@ -487,7 +476,7 @@ The following example returns the first and last element in the favorites array:
   ])
 ```
 
-#### $reduce(aggregation)
+- $reduce(aggregation)
 
 Applies an expression to each element in an array and combines them into a single value.
 
@@ -503,7 +492,7 @@ Applies an expression to each element in an array and combines them into a singl
 }
 ```
 
-#### $let(aggregation)
+- $let(aggregation)
 
 Binds variables for use in the specified expression, and returns the result of the expression.
 
