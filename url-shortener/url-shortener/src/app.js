@@ -9,10 +9,10 @@ import connectDB from './services/connectDB.js';
 
 dotenv.config();
 
-const databaseURI = process.env.MONGODB_URI;
 const app = express();
 
 // connect database;
+const databaseURI = process.env.MONGODB_URI;
 connectDB(databaseURI);
 
 // session middleware

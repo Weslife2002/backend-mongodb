@@ -26,12 +26,25 @@
     <p class="boxtextcenter">This is a free tool to shorten a URL or reduce a link<br>Login or create a new account to
       keep track of the shorten urls</p>
     <div class="flex-box">
-      <a href="/login">
+      <!-- <a href="/login">
         <button class="login-signup-btn">LogIn</button>
-      </a>
-      <a href="/sign-up">
-        <button class="login-signup-btn">SignUp</button>
-      </a>
+      </a> -->
+      <% if (!logined) {%>
+        <a href="/login">
+          <button class="login-signup-btn">
+            LogIn
+          </button>
+        </a>
+        <%} else {%>
+          <a href="/log-out">
+            <button class="login-signup-btn">
+              LogOut
+            </button>
+          </a>
+          <%}%>
+            <a href="/sign-up">
+              <button class="login-signup-btn">SignUp</button>
+            </a>
     </div>
   </section>
   <div id="box">

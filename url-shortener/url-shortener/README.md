@@ -56,5 +56,3 @@ Users and guest:
 5. User can delete the URL.
 6. The server will check if the link is valid.
 7. Track user-abnormality.
-
-

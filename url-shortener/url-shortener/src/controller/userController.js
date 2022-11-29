@@ -1,7 +1,15 @@
 /* eslint-disable import/extensions */
+import dotenv from 'dotenv';
+import redisClient from '../services/redisClient.js';
 import { User } from '../models/User.js';
 
+dotenv.config();
+
 const userController = {
+  processLogOut: async (req, res) => {
+    req.session.destroy();
+    res.redirect('/login');
+  },
   createUser: async (req, res) => {
     if (req.body.username === undefined || req.body.password === undefined) {
       return res.status(422).send({
@@ -19,15 +27,15 @@ const userController = {
           message: 'Duplicated username',
         });
       }
-      const newUser = await User.insertMany([{
+      await User.insertMany([{
         username: req.body.username,
         password: req.body.password,
         urlList: [],
       }]);
-      return res.status(200).send({
-        message: 'Successfully create new user',
-        data: { newUser: newUser[0] },
-      });
+      req.session.user = { username: req.body.username, password: req.body.password, urlList: [] };
+      redisClient.lpush(`user:${req.body.username}`, `sess:${req.session.id}`);
+      redisClient.pexpire(`user:${req.body.username}`, process.env.SESSION_TIME_OUT);
+      return res.redirect('/');
     } catch (err) {
       return res.status(400).send({
         errCode: -2,
@@ -50,10 +58,9 @@ const userController = {
       });
       if (user) {
         req.session.user = user;
-        return res.status(200).send({
-          message: 'Successfully Login',
-          data: { user },
-        });
+        redisClient.lpush(`user:${user.username}`, `sess:${req.session.id}`);
+        redisClient.pexpire(`user:${req.body.username}`, process.env.SESSION_TIME_OUT);
+        return res.redirect('/');
       }
       return res.status(401).send({
         errCode: -2,
@@ -87,7 +94,6 @@ const userController = {
       });
     }
   },
-
 };
 
 export default userController;
