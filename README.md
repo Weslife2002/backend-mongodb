@@ -27,7 +27,6 @@
     - [The Computed Pattern](#the-computed-pattern)
   - [Aggregation](#aggregation)
     - [Aggregation pipeline stage](#aggregation-pipeline-stage)
-      - [$merge](#merge)
     - [Aggregation Pipeline Operators](#aggregation-pipeline-operators)
 - [**ORM and Driver**](#orm-and-driver)
 - [**Mongoose**](#mongoose)
@@ -406,7 +405,7 @@ Passes a document to the next stage that contains a count of the number of docum
   { $count: <string> }
 ```
 
-#### $merge
+- $merge
 
 Writes the results of the aggregation pipeline to a specified collection. The $merge operator must be the last stage in the pipeline.
 
