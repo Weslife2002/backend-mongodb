@@ -1,14 +1,21 @@
-# Task 2
+# URL-shortener app
 
-## Task 2 requirement
+## Some features the app provides
 
-I was assigned to create an url shortener web service that meets the following requirements:
+Admins:
 
-- Users can shorten their url without login.
-- Users can keep track of their url 's visit times.
-- Users can delete their shorten urls.
+1. Admin can see the statistics about URLs and users.
+2. Admin can disable user and if at that time the user has already logined, they will be logged out.
+3. Admin can delete any URLs, users from database.
 
-## Data Modelling Step
+Users and guest:
+
+1. User and guests can create and access the shortened link.
+2. User can delete the URL and see statistic about that.
+3. User can login using google or facebook account.
+4. Tracking url access location.
+
+## Data Modelling
 
 To meet the requirement, we will need to stores infomation about user account (username, password) and the url detail (the shorten one, the original one).
 
@@ -21,15 +28,7 @@ There are something to consider :
 
 In conclusion, the reference method seems to be the one to go for this situation.
 
-## Workflow for task 2
-
-1. Create Model for users and urls.
-2. Create route for create-new-user, login, shorten-url, statics.
-3. Implement the methods.
-
-## Optimization
-
-### Using Reddis for storing user session
+## Using Reddis for storing user session
 
 As in the ``express-session`` document:
 
@@ -38,21 +37,3 @@ As in the ``express-session`` document:
 That means, we should not use the MemoryStore for storing the user session. That could lead to unexpected side-effect in production environment.
 
 Beside, if we need to reload the server due to some process being crash. The memory will be clear, and the user they all need to login again.
-
-## Some features the app provides
-
-Admins:
-
-1. Admin can see the dashboard the URL and users.
-2. Admin can disable user and if at that time the user has already logined, they will be logged out. (/user-management)
-3. Admin can delete URL.
-
-Users and guest:
-
-1. User and guests can create and access the shortened link.
-2. The shoterned can have expiration time.
-3. Guest will have default shortened link existed of 1 week.
-4. User can login using google account.
-5. User can delete the URL.
-6. The server will check if the link is valid.
-7. Track user-abnormality.
