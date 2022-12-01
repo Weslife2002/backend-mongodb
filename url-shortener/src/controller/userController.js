@@ -11,30 +11,31 @@ const userController = {
     res.redirect('/login');
   },
   createUser: async (req, res) => {
-    if (req.body.username === undefined || req.body.password === undefined) {
+    if (req.body.email === undefined || req.body.password === undefined) {
       return res.status(422).send({
         errCode: -2,
         message: 'Missing field',
       });
     }
     try {
-      const existedUser = await User.findOne({
-        username: req.body.username,
-      });
+      const existedUser = await User.findOne({ email: req.body.email });
       if (existedUser) {
         return res.status(403).send({
           errCode: -2,
-          message: 'Duplicated username',
+          message: 'Duplicated email',
         });
       }
       await User.insertMany([{
-        username: req.body.username,
+        email: req.body.email,
         password: req.body.password,
         urlList: [],
       }]);
-      req.session.user = { username: req.body.username, password: req.body.password, urlList: [] };
-      redisClient.lpush(`user:${req.body.username}`, `sess:${req.session.id}`);
-      redisClient.pexpire(`user:${req.body.username}`, process.env.SESSION_TIME_OUT);
+      req.session.user = { email: req.body.email, password: req.body.password, urlList: [] };
+      if (!req.session.device) {
+        return res.redirect('/sign-up');
+      }
+      redisClient.lpush(`user:${req.body.email}`, `sess:${req.session.id}`);
+      redisClient.pexpire(`user:${req.body.email}`, process.env.SESSION_TIME_OUT);
       return res.redirect('/');
     } catch (err) {
       return res.status(400).send({
@@ -46,25 +47,29 @@ const userController = {
 
   login: async (req, res) => {
     try {
-      if (req.body.username === undefined || req.body.password === undefined) {
+      if (req.body.email === undefined || req.body.password === undefined) {
         return res.status(422).send({
           errCode: -2,
           message: 'Missing field',
         });
       }
       const user = await User.findOne({
-        username: req.body.username,
+        email: req.body.email,
         password: req.body.password,
       });
       if (user) {
         req.session.user = user;
-        redisClient.lpush(`user:${user.username}`, `sess:${req.session.id}`);
-        redisClient.pexpire(`user:${req.body.username}`, process.env.SESSION_TIME_OUT);
+        if (!req.session.device) {
+          return res.redirect('/login');
+        }
+
+        redisClient.lpush(`user:${user.email}`, `sess:${req.session.id}`);
+        redisClient.pexpire(`user:${req.body.email}`, process.env.SESSION_TIME_OUT);
         return res.redirect('/');
       }
       return res.status(401).send({
         errCode: -2,
-        message: 'Wrong username or password',
+        message: 'Wrong email or password',
       });
     } catch (err) {
       return res.status(500).send({
@@ -77,7 +82,7 @@ const userController = {
   getStatitics: async (req, res) => {
     try {
       if (req.session.user) {
-        const response = await User.findOne({ username: req.session.user.username }).populate('urlList');
+        const response = await User.findOne({ email: req.session.user.email }).populate('urlList');
         return res.status(200).send({
           message: 'Successfully retrieve the statistics',
           data: response.urlList,

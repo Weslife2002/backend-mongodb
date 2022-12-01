@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,7 @@
   <title>url-shortener</title>
   <link rel="stylesheet" href="/css/login.css">
 </head>
+
 <body>
   <div class="parent clearfix">
     <div class="bg-illustration">
@@ -18,14 +20,14 @@
         <span></span>
       </div>
     </div>
- 
+
     <div class="login">
       <div class="container">
         <h1>Login to your account</h1>
-    
+
         <div class="login-form">
           <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Username">
+            <input type="text" name="email" placeholder="Email">
             <input type="password" name="password" placeholder="Password">
             <div class="remember-form">
               <input type="checkbox">
@@ -35,24 +37,34 @@
               <a href="/sign-up">Sign Up</a>
             </div>
             <button type="submit">LOG-IN</button>
-            <div class="google-facebook-login">
-              <a href="/auth/facebook">
-                <button class="loginBtn loginBtn--facebook">
+
+          </form>
+          <div class="google-facebook-login">
+            <a href="/auth/facebook">
+              <button class="loginBtn loginBtn--facebook">
                 Login with Facebook
               </button>
-              </a>
-              <a href="/auth/google">
-                <button class="loginBtn loginBtn--google">
+            </a>
+            <a href="/auth/google">
+              <button class="loginBtn loginBtn--google">
                 Login with Google
               </button>
-              </a>
-            </div>
-          </form>
-
+            </a>
+          </div>
         </div>
-    
+
       </div>
-      </div>
+    </div>
   </div>
 </body>
+<script src="js/platform.js"></script>
+<script>
+  window.onload = () => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", '/platformAutoSend', true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send(`description=${platform.description}`);
+  }
+</script>
+
 </html>

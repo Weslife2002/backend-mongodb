@@ -5,46 +5,47 @@ import homeController from '../controller/homeController.js';
 import userController from '../controller/userController.js';
 import urlController from '../controller/urlController.js';
 import adminController from '../controller/adminController.js';
-import redisClient from '../services/redisClient.js';
+import passportController from '../controller/passportController.js';
+import testController from '../controller/testController.js';
+import platformController from '../controller/platformController.js';
 
 const router = express.Router();
 
 const initWebroute = app => {
-  // # User-management
+  // User-management
   router.get('/', homeController.getHomePage);
   router.get('/login', homeController.getLoginPage);
   router.get('/sign-up', homeController.getSignUpPage);
   router.get('/get-session', homeController.getSession);
   router.get('/get-session-id', homeController.getSessionId);
 
+  // User-account device management
+  router.post('/device-type-list', platformController.deviceTypeList);
+  router.post('/platformAutoSend', platformController.successMessage);
+  router.post('/disable-device', platformController.disableDevice);
+
+  // Login and Sign-up management
   router.get('/statistics', userController.getStatitics);
   router.post('/create-user', userController.createUser);
   router.post('/login', userController.login);
   router.get('/log-out', userController.processLogOut);
-  router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-  router.get(
-    '/auth/facebook/callback',
-    passport.authenticate('facebook', { session: true }),
-    (req, res) => {
-      req.session.user = req.session.passport.user;
-      delete req.session.passport;
-      redisClient.lpush(`user:${req.session.user.username}`, `sess:${req.session.id}`);
-      redisClient.pexpire(`user:${req.session.user.username}`, process.env.SESSION_TIME_OUT);
-      res.redirect('/');
-    },
-  );
-  app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-  app.get(
-    '/auth/google/callback',
-    passport.authenticate('google', { session: true }),
-    (req, res) => {
-      req.session.user = req.session.passport.user;
-      delete req.session.passport;
-      redisClient.lpush(`user:${req.session.user.username}`, `sess:${req.session.id}`);
-      redisClient.pexpire(`user:${req.session.user.username}`, process.env.SESSION_TIME_OUT);
-      res.redirect('/');
-    },
-  );
+  router.get('/google-auth', testController.googleLogin);
+  router.get('/google-get-access-token', testController.googleGetAccessToken);
+  router.get('/google-login-callback', testController.googleLoginCallback);
+
+  // Passport route
+  router.get('/auth/facebook', passport.authenticate('facebook', { scope: [
+    'email',
+  ] }));
+  router.get('/auth/facebook/callback', passport.authenticate('facebook', { session: true }), passportController.handleSession);
+  router.get('/auth/google', passport.authenticate('google', { scope: [
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/user.addresses.read',
+    'https://www.googleapis.com/auth/user.phonenumbers.read',
+    'https://www.googleapis.com/auth/user.birthday.read',
+  ] }));
+  router.get('/auth/google/callback', passport.authenticate('google', { session: true }), passportController.handleSession);
 
   // # URL-management
   router.get('/:url', urlController.redirect);
