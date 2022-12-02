@@ -3,7 +3,6 @@
 import passport from 'passport';
 import passpostGoogle from 'passport-google-oauth20';
 import passportFacebook from 'passport-facebook';
-import axios from 'axios';
 import { User } from '../models/User.js';
 
 const handleGoogleCallback = async (accessToken, _, tokenDetail, profile, done) => {

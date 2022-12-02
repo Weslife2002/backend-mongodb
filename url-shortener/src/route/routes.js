@@ -30,6 +30,8 @@ const initWebroute = app => {
   router.post('/create-user', userController.createUser);
   router.post('/login', userController.login);
   router.get('/log-out', userController.processLogOut);
+  router.post('/forgot-password', userController.forgotPassword);
+  router.post('/reset-password/:token', userController.resetPassword);
 
   // URL-management
   router.get('/:url', urlController.redirect);

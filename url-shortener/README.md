@@ -42,11 +42,19 @@ Users and guest:
     GET /auth/google
     GET /auth/facebook
 
-4. User can delete the URL and see statistic about that.
+4. Reset password.
+
+    POST /forgot-password
+    Required parameter: email
+    POST /reset-password/:token
+    Required parameter: newPassword
+
+5. User can delete the URL and see statistic about all the links they have.
 
     DELETE /:url
+    GET /statistics
 
-5. User can see the device login into their account and can logout from a specific device. (This function can only be done when user have already logined)
+6. User can see the device login into their account and can logout from a specific device. (This function can only be done when user have already logined)
 
     GET /device/list
     GET /device/disable/:device

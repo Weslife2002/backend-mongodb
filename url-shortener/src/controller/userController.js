@@ -1,7 +1,9 @@
 /* eslint-disable import/extensions */
 import dotenv from 'dotenv';
+import cryptoRandomString from 'crypto-random-string';
 import redisClient from '../services/redisClient.js';
 import { User } from '../models/User.js';
+import sendEmail from '../utils/sendEmail.js';
 
 dotenv.config();
 
@@ -96,6 +98,52 @@ const userController = {
       return res.status(500).send({
         errCode: -2,
         message: err,
+      });
+    }
+  },
+
+  forgotPassword: (req, res) => {
+    const token = cryptoRandomString({ length: 32, type: 'base64' });
+    User.findOne({ email: req.body.email }).then(user => {
+      if (user) {
+        redisClient.set(token, req.body.email);
+        redisClient.pexpire(token, process.env.RESET_PASSWORD_TOKEN_TIME_OUT);
+        sendEmail(
+          req.body.email,
+          '[URL-SHORTENER] Password Reset Request!',
+          `This is the link to your email request: http:/localhost:8081/reset-password/${token}`,
+        );
+        return res.status(200).send({
+          message: 'Check your email to see the link where you can reset the password.',
+        });
+      }
+      return res.status(422).send({
+        message: 'Something went wrong!',
+        error: 'The email you provide does not exist',
+      });
+    }).catch(error => res.send({
+      message: 'Something went wrong!',
+      error,
+    }));
+  },
+
+  // eslint-disable-next-line consistent-return
+  resetPassword: async (req, res) => {
+    const userEmail = await redisClient.get(req.params.token);
+    if (userEmail) {
+      User.updateOne({ email: userEmail }, { password: req.body.newPassword }).then(
+        () => res.status(200).send({
+          message: 'Successfully reset the password!',
+          newPassword: req.body.newPassword,
+        }),
+      ).catch(error => res.status(400).send({
+        message: 'Something went wrong!',
+        error,
+      }));
+    } else {
+      return res.status(404).send({
+        message: 'Cannot reset the password!',
+        error: 'The link has expired!',
       });
     }
   },
