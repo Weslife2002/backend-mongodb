@@ -3,8 +3,6 @@
 import passport from 'passport';
 import passpostGoogle from 'passport-google-oauth20';
 import passportFacebook from 'passport-facebook';
-import jwt from 'jsonwebtoken';
-import utf8 from 'utf8';
 import axios from 'axios';
 import { User } from '../models/User.js';
 
@@ -14,7 +12,6 @@ const handleGoogleCallback = async (accessToken, _, tokenDetail, profile, done) 
   // 'https://www.googleapis.com/auth/user.birthday.read',
   const data = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
   console.log({ raw_data: data });
-  console.log({ decode_data: utf8.decode(data.data) });
   const email = profile.emails[0].value;
   User.findOne({ email, connectGoogle: true })
     .then(existingUser => {

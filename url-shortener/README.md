@@ -4,16 +4,52 @@
 
 Admins:
 
-1. Admin can see the statistics about URLs and users.
-2. Admin can disable user and if at that time the user has already logined, they will be logged out.
-3. Admin can delete any URLs, users from database.
+1. Admin account can be created, and admin can use that account to login next time, then they can log out.
+
+    POST /admin/sign-up
+    Require parameter: Email, password
+
+    POST /admin/login
+    Require parameter: Email, password
+
+    GET /admin/log-out
+
+2. Admin can delete any URLs, users (normal users) from database.
+
+    DELETE /admin/url/:url
+    DELETE /admin/user/:email
+
+3. Admin can disable user and if at that time the user has already logined, they will be logged out at all devices.
+
+    GET /admin/disable/:email)
 
 Users and guest:
 
-1. User and guests can create and access the shortened link.
-2. User can delete the URL and see statistic about that.
-3. User can login using google or facebook account.
-4. Tracking url access location.
+1. Guest can create account.
+
+    POST /create-user
+    Required parameter: Email, password
+
+2. User can login and log-out.
+
+    POST /login
+    Required parameter: Email, password
+
+    Get /log-out
+
+3. User can login using Google or Facebook.
+
+    GET /auth/google
+    GET /auth/facebook
+
+4. User can delete the URL and see statistic about that.
+
+    DELETE /:url
+
+5. User can see the device login into their account and can logout from a specific device. (This function can only be done when user have already logined)
+
+    GET /device/list
+    GET /device/disable/:device
 
 ## Data Modelling
 

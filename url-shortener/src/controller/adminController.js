@@ -45,7 +45,7 @@ const adminController = {
   getURLDashboard: (req, res) => res.render('login.ejs'),
   deleteUser: async (req, res) => {
     try {
-      User.deleteOne({ username: req.params.username });
+      User.deleteOne({ email: req.params.email });
       return res.status(200).send('admin/dashboard.ejs');
     } catch (error) {
       return res.status().send({});
@@ -81,7 +81,7 @@ const adminController = {
   },
 
   disableUser: (req, res) => {
-    redisClient.lrange(`user:${req.params.username}`, 0, -1, async (error, result) => {
+    redisClient.lrange(`user:${req.params.email}`, 0, -1, async (error, result) => {
       if (error) {
         return res.status(500).send({
           message: 'Disable user failed',
