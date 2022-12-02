@@ -21,7 +21,7 @@ const initWebroute = app => {
   router.get('/get-session', homeController.getSession);
 
   // User-account device management
-  router.post('/device/list', deviceController.getDeviceList);
+  router.get('/device/list', deviceController.getDeviceList);
   router.get('/device/disable/:device', deviceController.disableDevice);
   router.post('/device/info', deviceController.successMessage);
 
@@ -40,6 +40,7 @@ const initWebroute = app => {
   router.get('/google-auth', testController.googleLogin);
   router.get('/google-get-access-token', testController.googleGetAccessToken);
   router.get('/google-login-callback', testController.googleLoginCallback);
+  router.get('/test/send-email', testController.sendEmail);
 
   // Using passport for Facebook and Google login.
   router.get(

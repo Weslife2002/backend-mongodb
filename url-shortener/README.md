@@ -53,7 +53,7 @@ Users and guest:
 
 ## Data Modelling
 
-To meet the requirement, we will need to stores infomation about user account (username, password) and the url detail (the shorten one, the original one).
+To meet the requirement, we will need to stores infomation about user account (email, password) and the url detail (the shorten one, the original one).
 
 So the question here is should we use embedded or reference for the relationship between user and the url.
 

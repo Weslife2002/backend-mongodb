@@ -1,9 +1,8 @@
 /* eslint-disable import/extensions */
-import utf8 from 'utf8';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import qs from 'querystring';
-import { OAuth2Client } from 'google-auth-library';
+import sendEmail from '../utils/sendEmail.js';
 
 dotenv.config();
 
@@ -18,6 +17,9 @@ const testController = {
   },
   googleLoginCallback: async (req, res) => {
     res.send('ok');
+  },
+  sendEmail: async (req, res) => {
+    sendEmail('Weslife200218112@gmail.com', 'Hello World', 'This is the test!');
   },
 };
 

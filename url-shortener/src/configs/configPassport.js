@@ -10,8 +10,6 @@ const handleGoogleCallback = async (accessToken, _, tokenDetail, profile, done) 
   // 'https://www.googleapis.com/auth/user.addresses.read',
   // 'https://www.googleapis.com/auth/user.phonenumbers.read',
   // 'https://www.googleapis.com/auth/user.birthday.read',
-  const data = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
-  console.log({ raw_data: data });
   const email = profile.emails[0].value;
   User.findOne({ email, connectGoogle: true })
     .then(existingUser => {
