@@ -11,4 +11,4 @@ const pageTrackSchema = new mongoose.Schema({
 
 const PageTrack = mongoose.model('pageTrack', pageTrackSchema);
 
-export { PageTrack };
+export default PageTrack;

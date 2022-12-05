@@ -38,12 +38,15 @@ const deviceController = {
       const rawSession = await redisClient.get(sessionId);
       if (rawSession) {
         const session = JSON.parse(rawSession);
-        if (session.device === req.params.device) {
+        if (session.device.deviceId === req.params.deviceId) {
           redisClient.del(sessionId);
         }
       }
     });
-    return res.status(200).send('The device is logged out!');
+    return res.status(200).send({
+      message: 'The device is logged out!',
+      data: {},
+    });
   },
 };
 

@@ -1,16 +1,18 @@
 /* eslint-disable import/extensions */
-import UAParser from 'ua-parser-js';
-import redisClient from '../services/redisClient.js';
+import mannageAccountSessions from '../utils/manageAccountSessions.js';
 
 const passportController = {
   handleSession: (req, res) => {
-    req.session.user = req.session.passport.user;
+    const { email } = req.session.passport.user;
+    req.session.user = { email };
     delete req.session.passport;
-    redisClient.lpush(`user:${req.session.user.email}`, `sess:${req.session.id}`);
-    redisClient.pexpire(`user:${req.session.user.email}`, process.env.SESSION_TIME_OUT);
-    const userAgent = UAParser(req.headers['user-agent']);
-    req.session.device = `${userAgent.browser.name} ${userAgent.browser.version} on ${userAgent.os.name} ${userAgent.os.version} ${userAgent.cpu.architecture}`;
-    res.redirect('/');
+    mannageAccountSessions(req);
+    res.status(200).send({
+      message: 'Successful authentication!',
+      data: {
+        user: req.session.user,
+      },
+    });
   },
 };
 

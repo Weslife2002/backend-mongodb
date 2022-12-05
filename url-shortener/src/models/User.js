@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: true,
+    // required: true,
   },
   nativeUser: Boolean,
   connectFacebook: Boolean,
@@ -31,4 +31,4 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-export { User };
+export default User;

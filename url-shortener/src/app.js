@@ -3,11 +3,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import configViewEngine from './configs/configViewEngine.js';
-import initWebroute from './route/routes.js';
 import configMiddleware from './middleware/configMiddleware.js';
 import connectDB from './services/connectDB.js';
-import swaggerUI from 'swagger-ui-express';
-import docs from './docs/index.js';
+import route from './route/index.js';
 
 dotenv.config();
 
@@ -24,6 +22,6 @@ configMiddleware(app);
 configViewEngine(app);
 
 // Init web route
-initWebroute(app);
+route(app);
 
 export default app;

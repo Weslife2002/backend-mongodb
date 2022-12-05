@@ -1,20 +1,9 @@
 /* eslint-disable import/extensions */
-import { URL } from '../models/URL.js';
-import { User } from '../models/User.js';
-import { Admin } from '../models/Admin.js';
-import redisClient from '../services/redisClient.js';
+import { User, Admin } from '../models/index.js';
+import { redisClient } from '../services/index.js';
 
 const adminController = {
-  getDashboard: async (req, res) => {
-    const usersdata = await User.find({});
-    const URLdata = await URL.find({});
-    return res.status(200).render('admin/dashboard.ejs', {
-      logined: req.session.admin !== undefined,
-      usersdata,
-      URLdata,
-    });
-  },
-  processAdminLogin: async (req, res) => {
+  authAdmin: async (req, res) => {
     try {
       if (req.body.username === undefined || req.body.password === undefined) {
         return res.status(422).send({
@@ -26,14 +15,14 @@ const adminController = {
         username: req.body.username,
         password: req.body.password,
       });
-      if (admin) {
-        req.session.admin = admin;
-        return res.redirect('/admin/dashboard');
+      if (!admin) {
+        return res.status(403).send({
+          message: 'Authentication failed!',
+          error: 'Wrong username or password',
+        });
       }
-      return res.status(403).send({
-        message: 'Authentication failed!',
-        error: 'Wrong username or password',
-      });
+      req.session.admin = admin;
+      return res.redirect('/admin/dashboard');
     } catch (error) {
       return res.status(400).send({
         message: 'Authentication failed',
@@ -41,21 +30,22 @@ const adminController = {
       });
     }
   },
-  getUserDashboard: (req, res) => res.render('login.ejs'),
-  getURLDashboard: (req, res) => res.render('login.ejs'),
   deleteUser: async (req, res) => {
     try {
       User.deleteOne({ email: req.params.email });
-      return res.status(200).send('admin/dashboard.ejs');
+      return res.status(200).send('The user was deleted');
     } catch (error) {
-      return res.status().send({});
+      return res.status().send({
+        message: 'Something wrong',
+        error,
+      });
     }
   },
-  getSignUpPage: (req, res) => res.render('admin/sign-up.ejs'),
-  getLoginPage: (req, res) => res.render('admin/login.ejs'),
   processLogOut: (req, res) => {
     delete req.session.admin;
-    res.redirect('/admin/dashboard');
+    res.status(200).send({
+      message: 'You have successfully log-out.',
+    });
   },
   createAdmin: async (req, res) => {
     try {
@@ -95,7 +85,6 @@ const adminController = {
       await Promise.all(delCommands);
       return res.status(200).send('OK');
     });
-    // const sessionList = await redisClient.get(req.params.username;
   },
 };
 

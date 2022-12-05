@@ -11,4 +11,4 @@ const urlTrackSchema = new mongoose.Schema({
 
 const URLTrack = mongoose.model('urlTrack', urlTrackSchema);
 
-export { URLTrack };
+export default URLTrack;

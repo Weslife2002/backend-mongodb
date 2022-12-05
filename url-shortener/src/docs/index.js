@@ -3,10 +3,12 @@ import basicInfo from './basicInfo.js';
 import servers from './servers.js';
 import components from './components.js';
 import tags from './tags.js';
+import admin from './admin/index.js';
 
-export {
-  basicInfo,
-  servers,
-  components,
-  tags,
+export default {
+  ...basicInfo,
+  ...servers,
+  ...components,
+  ...tags,
+  ...admin,
 };

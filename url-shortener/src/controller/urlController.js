@@ -1,55 +1,53 @@
 /* eslint-disable import/extensions */
 import cryptoRandomString from 'crypto-random-string';
-import _ from 'lodash';
-import { User } from '../models/User.js';
-import { URL } from '../models/URL.js';
+import { User, URL } from '../models/index.js';
 
 const urlController = {
   shortenURL: async (req, res) => {
     try {
       if (req.body.url === undefined) {
         return res.status(422).send({
-          message: 'Missing field',
-          errCode: -2,
+          message: 'Shotern url failed',
+          error: 'Missing url field',
         });
       }
       const shortenUrl = cryptoRandomString({ length: 10, type: 'url-safe' });
+      const newUrl = { shortenUrl, originalUrl: req.body.url, clickNo: 0 };
+      const newUrlInstances = await URL.insertMany([newUrl]);
       if (req.session.user) {
-        const newUrl = { shortenUrl, originalUrl: req.body.url, count: 0 };
-        const newUrlInstance = await URL.insertMany([newUrl]);
         await User.updateOne(
-          { username: req.session.user.username },
-          { $push: { urlList: newUrlInstance[0]._id } },
+          { email: req.session.user.email },
+          { $push: { urlList: newUrlInstances[0]._id } },
         );
-        return res.status(200).send({
-          message: 'url is shorten',
-          data: newUrl,
-        });
       }
-      const newUrl = { shortenUrl, originalUrl: req.body.url };
-      await URL.insertMany([newUrl]);
       return res.status(200).send({
         message: 'url is shorten',
         data: newUrl,
       });
-    } catch (err) {
+    } catch (error) {
       return res.status(500).send({
-        errCode: -3,
-        message: err,
+        message: 'Something went wrong!',
+        error,
       });
     }
   },
 
-  redirect: async (req, res) => {
+  getOriginalURLFromShortenedURL: async (req, res) => {
     try {
       const urlInstance = await URL.findOne({ shortenUrl: req.params.url });
-      if (urlInstance) {
-        await URL.updateOne({ _id: urlInstance._id }, { $inc: { clickNo: 1 } });
-        return res.redirect(urlInstance.originalUrl);
+      if (!urlInstance) {
+        return res.status(404).send({
+          errCode: -5,
+          message: 'The shorten url is not found',
+        });
       }
-      return res.status(404).send({
-        errCode: -5,
-        message: 'The shorten url is not found',
+      URL.updateOne({ _id: urlInstance._id }, { $inc: { clickNo: 1 } });
+      return res.status(200).send({
+        message: 'Successfully retrieve the shorten url',
+        data: {
+          shortenURL: req.params.shortenURL,
+          originalURL: urlInstance.originalUrl,
+        },
       });
     } catch (err) {
       return res.status(500).send({
@@ -63,42 +61,44 @@ const urlController = {
     try {
       if (req.session.user === undefined) {
         return res.status(403).send({
-          message: 'Login required',
-          errCode: -2,
+          message: 'Unauthorized',
+          error: 'Login required',
         });
       }
 
-      const userInstance = await User.findOne({
-        username: req.session.user.username,
-      }).populate('urlList');
-
-      const ownTheUrl = _.findIndex(
-        userInstance.data,
-        urlDetail => urlDetail.shortenURL === req.params.url,
-      ) !== -1;
-
-      if (!ownTheUrl) {
-        return res.status(403).send({
-          errCode: -2,
-          message: 'Only owner can delete the shorten url',
-        });
-      }
-      // const urlInstance = await URL.findOne({ shortenUrl: req.params.url });
-      if (urlInstance) {
-        // await URL.deleteOne({ shortenUrl: req.params.url });
-        return res.status(200).send({
-          message: 'Successfully delete the url',
-          data: urlInstance,
-        });
-      }
-      return res.status(404).send({
-        errCode: -2,
-        message: 'Successfully delete the url',
+      const urlInstance = await URL.findOne({
+        shortenUrl: req.params.url,
       });
-    } catch (err) {
+      if (!urlInstance) {
+        return res.status(404).send({
+          message: 'Not found',
+          error: 'The shortened URL does not exists',
+        });
+      }
+      User.updateOne({
+        email: req.session.user.email,
+        urlList: urlInstance._id,
+      }, { $pull: { urlList: urlInstance._id } }).then(
+        result => {
+          if (result.modifiedCount !== 1) {
+            return res.status(403).send({
+              message: 'Unauthorized',
+              error: 'You cannot delete the URL you do not own!',
+            });
+          }
+          URL.deleteOne({ shortenUrl: req.params.url });
+          return res.status(200).send({
+            message: 'The shortened URL is deleted!',
+            data: {
+              result,
+            },
+          });
+        },
+      );
+    } catch (error) {
       return res.status(500).send({
-        errCode: -3,
-        message: JSON.stringify(err),
+        message: 'Something went wrong!',
+        error,
       });
     }
   },

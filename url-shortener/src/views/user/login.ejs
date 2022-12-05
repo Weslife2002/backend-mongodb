@@ -57,14 +57,5 @@
     </div>
   </div>
 </body>
-<script src="js/platform.js"></script>
-<script>
-  window.onload = () => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", '/device/info', true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.send(`description=${platform.description}`);
-  }
-</script>
 
 </html>
