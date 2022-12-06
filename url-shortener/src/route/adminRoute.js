@@ -13,7 +13,6 @@ adminRoute.get('/log-out', adminController.processLogOut);
 
 // Admin function - Delete specific url, user, disable account.
 adminRoute.delete('/user/:email', adminController.deleteUser);
-// TODO: When delete user, end all of their current session.
 // router.delete('/admin/url/:url', adminController.deleteShortenURL);
 adminRoute.get('/disable/:email', adminController.disableUser);
 

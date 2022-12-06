@@ -15,7 +15,6 @@ export default {
             required: true,
           },
         },
-
       },
       User: {
         type: 'object',
@@ -41,41 +40,25 @@ export default {
           password: {
             type: 'string',
           },
-          urlList: [{
-            type: 'ObjectId',
+          urlList: {
+            // NOTE: check here
+            type: 'ObjectId List',
             ref: 'url',
-          }],
-        },
-      },
-      // Todo input model
-      TodoInput: {
-        type: 'object', // data type
-        properties: {
-          title: {
-            type: 'string', // data type
-            description: "Todo's title", // desc
-            example: 'Coding in JavaScript', // example of a title
-          },
-          completed: {
-            type: 'boolean', // data type
-            description: 'The status of the todo', // desc
-            example: false, // example of a completed value
           },
         },
       },
-      // error model
-      Error: {
+      URL: {
         type: 'object', // data type
         properties: {
-          message: {
+          originalUrl: {
             type: 'string', // data type
-            description: 'Error message', // desc
-            example: 'Not found', // example of an error message
           },
-          internal_code: {
-            type: 'string', // data type
-            description: 'Error internal code', // desc
-            example: 'Invalid parameters', // example of an error internal code
+          shortenUrl: {
+            type: 'string',
+            index: true,
+          },
+          clickNo: {
+            type: 'number', // data type
           },
         },
       },

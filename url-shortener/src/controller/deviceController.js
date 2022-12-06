@@ -22,10 +22,6 @@ const deviceController = {
     const deviceList = sessionList.map(session => session.device);
     return res.status(200).send({ deviceList });
   },
-  successMessage: (req, res) => {
-    req.session.device = req.body.description;
-    res.send('OK');
-  },
   disableDevice: async (req, res) => {
     if (!req.session.user) {
       return res.status(403).send({

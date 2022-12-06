@@ -1,9 +1,6 @@
 export default {
   tags: [
     {
-      name: 'Todo CRUD operations',
-    },
-    {
       name: 'User operations',
     },
     {

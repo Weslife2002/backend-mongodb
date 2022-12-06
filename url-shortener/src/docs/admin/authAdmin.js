@@ -1,7 +1,7 @@
 export default {
   post: {
     tags: ['Admin operations'], // operation's tag.
-    operationId: 'Create New Admin', // unique operation id.
+    operationId: 'Authenticate Admin', // unique operation id.
     consumes: ['application/json'],
     requestBody: {
       required: true,

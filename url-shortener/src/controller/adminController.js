@@ -1,90 +1,127 @@
 /* eslint-disable import/extensions */
 import { User, Admin } from '../models/index.js';
-import { redisClient } from '../services/index.js';
+import endAccountSessions from '../utils/endAccountSessions.js';
+import hash from '../utils/hash.js';
 
 const adminController = {
   authAdmin: async (req, res) => {
     try {
       if (req.body.username === undefined || req.body.password === undefined) {
         return res.status(422).send({
-          message: 'Authentication failed',
+          message: 'Authentication failed!',
           error: 'Missing required parameter!',
         });
       }
-      const admin = await Admin.find({
+      Admin.find({
         username: req.body.username,
-        password: req.body.password,
-      });
-      if (!admin) {
-        return res.status(403).send({
-          message: 'Authentication failed!',
-          error: 'Wrong username or password',
+        password: hash(req.body.password),
+      }).then(admin => {
+        if (!admin) {
+          return res.status(403).send({
+            message: 'Authentication failed!',
+            error: 'Wrong username or password',
+          });
+        }
+        req.session.admin = { username: admin.username };
+        return res.status(200).send({
+          message: 'Authentication success!',
+          data: {
+            admin: {
+              username: admin.username,
+            },
+          },
         });
-      }
-      req.session.admin = admin;
-      return res.redirect('/admin/dashboard');
+      });
     } catch (error) {
       return res.status(400).send({
-        message: 'Authentication failed',
+        message: 'Something went wrong!',
         error,
       });
     }
   },
+
   deleteUser: async (req, res) => {
+    if (!req.session.admin) {
+      return res.status(403).send({
+        message: 'Unauthorized!',
+        error: 'You need to login as an admin to delete user',
+      });
+    }
     try {
+      endAccountSessions(req.params.email);
       User.deleteOne({ email: req.params.email });
-      return res.status(200).send('The user was deleted');
+      return res.status(200).send({
+        message: 'The user was deleted',
+        data: {},
+      });
     } catch (error) {
-      return res.status().send({
+      return res.status(400).send({
         message: 'Something wrong',
         error,
       });
     }
   },
+
   processLogOut: (req, res) => {
     delete req.session.admin;
     res.status(200).send({
       message: 'You have successfully log-out.',
+      data: {},
     });
   },
-  createAdmin: async (req, res) => {
-    try {
-      if (req.body.username === undefined || req.body.password === undefined) {
-        return res.status(402).send({
-          message: 'Create admin failed',
-          error: 'Missing required parameters',
-        });
-      }
-      const newAdmin = await Admin.insertMany([req.body]);
 
-      req.session.admin = newAdmin;
+  createAdmin: async (req, res) => {
+    console.log(req.body);
+    if (req.body.username === undefined || req.body.password === undefined) {
+      return res.status(402).send({
+        message: 'Create admin failed!',
+        error: 'Missing required parameters',
+      });
+    }
+    try {
+      const { username, password } = req.body;
+      await Admin.insertMany([{
+        username,
+        password: hash(password),
+      }]);
+      req.session.admin = {
+        username,
+      };
       return res.status(200).send({
         message: 'Successfully create new admin!',
-        data: newAdmin,
+        data: {
+          admin: {
+            username,
+          },
+        },
       });
     } catch (error) {
       return res.status(500).send({
-        message: 'Create admin failed',
-        error: error.writeErrors[0].errmsg,
+        message: 'Something went wrong!',
+        error,
       });
     }
   },
 
   disableUser: (req, res) => {
-    redisClient.lrange(`user:${req.params.email}`, 0, -1, async (error, result) => {
-      if (error) {
-        return res.status(500).send({
-          message: 'Disable user failed',
-          error,
-        });
-      }
-      const delCommands = [];
-      result.forEach(sessionKey => {
-        delCommands.push(redisClient.del(sessionKey));
+    if (!req.session.admin) {
+      return res.status(403).send({
+        message: 'Unauthorized!',
+        error: 'You need to login as an admin to delete user',
       });
-      await Promise.all(delCommands);
-      return res.status(200).send('OK');
-    });
+    }
+    try {
+      endAccountSessions(req.params.email);
+      return res.status(200).send({
+        message: 'The user is disable',
+        data: {},
+      });
+    } catch (error) {
+      return res.status(500).send({
+        message: 'Something went wrong',
+        error,
+      });
+    }
   },
 };
 
